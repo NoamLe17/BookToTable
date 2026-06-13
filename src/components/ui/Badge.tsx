@@ -2,9 +2,8 @@ import { cn } from '@/lib/utils';
 import { OrderStatus } from '@/types';
 
 const statusLabels: Record<OrderStatus, string> = {
-  pending: 'ממתין',
-  picked_up: 'נאסף',
-  in_transit: 'בדרך',
+  pending: 'ממתין לאריזה',
+  shipped: 'נשלח',
   delivered: 'נמסר',
 };
 
