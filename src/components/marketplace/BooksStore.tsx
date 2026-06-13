@@ -20,7 +20,7 @@ export default function BooksStore({ books }: { books: Book[] }) {
   const filteredBooks = useMemo(() => {
     return books.filter(book => {
       const matchesSearch = book.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                            book.authorName.toLowerCase().includes(searchTerm.toLowerCase());
+                            (book.authorName || '').toLowerCase().includes(searchTerm.toLowerCase());
       const matchesPrice = book.price <= maxPrice;
       const matchesGenre = selectedGenre ? book.genre === selectedGenre : true;
       return matchesSearch && matchesPrice && matchesGenre;
