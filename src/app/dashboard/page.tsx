@@ -19,6 +19,7 @@ export default function DashboardPage() {
   // Settings State
   const [bio, setBio] = useState(user?.bio || '');
   const [age, setAge] = useState(user?.age || '');
+  const [paymentLink, setPaymentLink] = useState(user?.paymentLink || '');
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [savingSettings, setSavingSettings] = useState(false);
 
@@ -110,6 +111,7 @@ export default function DashboardPage() {
       await updateDoc(doc(db, 'users', firebaseUser.uid), {
         bio,
         age,
+        paymentLink,
         ...(avatarUrl && { avatarUrl })
       });
 
@@ -346,6 +348,19 @@ export default function DashboardPage() {
                   className="w-full md:w-1/3 bg-gray-50 border border-gray-200 rounded-lg py-2.5 px-4 focus:outline-none focus:ring-2 focus:ring-green-500"
                   placeholder="למשל: 34"
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-1">קישור אישי לתשלום (Paybox / Bit / וכו') *</label>
+                <input 
+                  type="url" 
+                  value={paymentLink}
+                  onChange={(e) => setPaymentLink(e.target.value)}
+                  required
+                  className="w-full bg-gray-50 border border-gray-200 rounded-lg py-2.5 px-4 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="https://payboxapp.page.link/..."
+                  dir="ltr"
+                />
+                <p className="text-xs text-gray-500 mt-1">חובה! לשם יועברו התשלומים מהרוכשים.</p>
               </div>
               
               <div>

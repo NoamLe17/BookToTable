@@ -61,7 +61,14 @@ export async function POST(request: Request) {
           ${buyerNoteHtml}
 
           <div style="margin-top: 32px; padding: 16px; background-color: #f3f4f6; border-radius: 8px; text-align: center;">
-            <p style="margin: 0; font-size: 14px;">אנא ארוז את הספרים בהקדם והיכנס ללוח הבקרה שלך באתר כדי להזין מספר מעקב למשלוח.</p>
+            <div style="background-color: #fef2f2; border: 1px solid #fee2e2; border-radius: 8px; padding: 16px; margin: 24px 0;">
+              <h3 style="color: #991b1b; margin-top: 0;">⚠️ שים לב - אישור תשלום נדרש!</h3>
+              <p style="color: #7f1d1d; margin-bottom: 0;">לקוח זה ביצע הזמנה והופנה לקישור התשלום הישיר שלך (Paybox/Bit). <strong>אנא ודא שהכסף אכן נכנס לחשבונך לפני שאתה אורז ושולח את הספר!</strong></p>
+            </div>
+
+            <p style="color: #4b5563; font-size: 16px;">
+              אפשר להתחיל לארוז! הנה פרטי ההזמנה והמשלוח:
+            </p>
             <p style="margin: 8px 0 0 0; font-weight: bold;"><a href="https://booktotable.co.il/dashboard" style="color: #16a34a; text-decoration: none;">כניסה ללוח הבקרה</a></p>
           </div>
         </div>

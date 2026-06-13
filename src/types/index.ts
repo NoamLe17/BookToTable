@@ -10,6 +10,7 @@ export interface User {
   stripeAccountId?: string;
   stripeOnboarded: boolean;
   allowsFanMail: boolean;
+  paymentLink?: string;
   pickupAddress?: {
     street: string;
     city: string;
@@ -34,7 +35,7 @@ export interface Book {
   createdAt: number;
 }
 
-export type OrderStatus = 'pending' | 'shipped' | 'delivered';
+export type OrderStatus = 'pending_payment' | 'pending' | 'shipped' | 'delivered';
 export type ShippingCompany = 'cheetah' | 'hfd' | 'israel_post' | 'other';
 
 export interface Order {

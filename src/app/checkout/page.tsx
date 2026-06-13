@@ -245,7 +245,7 @@ export default function CheckoutPage() {
 
               <div className="bg-blue-50 border border-blue-100 p-4 rounded-xl mb-6">
                 <p className="text-xs text-blue-800 font-medium leading-relaxed">
-                  <strong>תשלום מאובטח באמצעות PayPlus:</strong> עם לחיצה על תשלום, תועבר לעמוד סליקה מאובטח של PayPlus (התשלום מפוצל אוטומטית בין הסופרים לפלטפורמה).
+                  <strong>תשלום ישיר לסופר:</strong> עם לחיצה על תשלום, תקבל קישורים מאובטחים להעברת התשלום ישירות לחשבון (Paybox/Bit) של הסופרים שממנו רכשת.
                 </p>
               </div>
               
@@ -256,9 +256,9 @@ export default function CheckoutPage() {
                 className="w-full flex items-center justify-center bg-gray-900 hover:bg-black text-white font-bold py-4 px-6 rounded-xl shadow-md transition-all text-lg disabled:opacity-70"
               >
                 {isSubmitting ? (
-                  <><Loader2 className="animate-spin ml-2" size={20} /> מעבד תשלום...</>
+                  <><Loader2 className="animate-spin ml-2" size={20} /> מייצר הזמנה...</>
                 ) : (
-                  <><ShieldCheck className="ml-2" size={20} /> שלם ₪{totalToPay.toFixed(2)} וסיים</>
+                  <><ShieldCheck className="ml-2" size={20} /> המשך לתשלום ₪{totalToPay.toFixed(2)}</>
                 )}
               </button>
             </div>
