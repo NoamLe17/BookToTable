@@ -91,7 +91,7 @@ export default function TrackOrderPage() {
                   <h4 className="text-2xl font-black text-gray-900 mb-2">הספר באריזה אצל הסופר</h4>
                   <p className="text-gray-600 font-medium">הסופר קיבל את ההזמנה שלך ומכין אותה ברגעים אלו למשלוח. ברגע שהיא תצא לדרך, מספר המעקב יופיע כאן.</p>
                 </div>
-              ) : order.status === 'shipped' || order.status === 'in_transit' || order.status === 'delivered' ? (
+              ) : order.status === 'shipped' || order.status === 'delivered' ? (
                 <div className="flex flex-col items-center text-center py-6">
                   <div className="w-16 h-16 bg-green-100 text-green-600 rounded-2xl flex items-center justify-center mb-4">
                     <Truck size={32} />
