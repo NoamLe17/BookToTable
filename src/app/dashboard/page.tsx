@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { Book as BookIcon, DollarSign, TrendingUp, Package, Settings } from 'lucide-react';
+import { Book as BookIcon, DollarSign, TrendingUp, Package, Settings, HelpCircle, X } from 'lucide-react';
 import Link from 'next/link';
 import { collection, query, where, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -22,6 +22,7 @@ export default function DashboardPage() {
   const [paymentLink, setPaymentLink] = useState(user?.paymentLink || '');
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [savingSettings, setSavingSettings] = useState(false);
+  const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
 
   useEffect(() => {
     async function fetchMyBooks() {
@@ -350,7 +351,16 @@ export default function DashboardPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-1">קישור אישי לתשלום (Paybox / Bit / וכו') *</label>
+                <div className="flex items-center gap-2 mb-1">
+                  <label className="block text-sm font-bold text-gray-700">קישור לתשלום (Paybox / אשראי / Bit) *</label>
+                  <button 
+                    type="button" 
+                    onClick={() => setIsHelpModalOpen(true)}
+                    className="text-gray-400 hover:text-green-600 transition-colors"
+                  >
+                    <HelpCircle size={16} />
+                  </button>
+                </div>
                 <input 
                   type="url" 
                   value={paymentLink}
@@ -387,6 +397,47 @@ export default function DashboardPage() {
           </div>
         </form>
       </div>
+
+      {/* Help Modal */}
+      {isHelpModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl w-full max-w-lg shadow-xl overflow-hidden relative">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-bold text-gray-900">איך עובד התשלום הישיר?</h3>
+                <button 
+                  onClick={() => setIsHelpModalOpen(false)}
+                  className="text-gray-400 hover:text-gray-600 bg-gray-50 hover:bg-gray-100 rounded-full p-2 transition-colors"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+              
+              <div className="space-y-4 text-gray-700 text-sm leading-relaxed">
+                <p>במודל הנוכחי, התשלום מהקורא עובר ישירות אליך ללא עמלות תיווך! כדי לקבל תשלום, עליך להדביק כאן קישור קבוע אליו יופנו הקוראים בסיום ההזמנה.</p>
+                
+                <ul className="list-disc pr-5 space-y-3">
+                  <li><strong>לסופרים פרטיים (ללא עוסק):</strong> מומלץ לפתוח "קופה" חינמית באפליקציית Paybox (יש להגדיר בהגדרות הקופה שהיא 'פרטית'), ולהדביק כאן את הקישור שנוצר לקופה.</li>
+                  <li><strong>לסופרים בעלי עסק רשום:</strong> ניתן להדביק כאן קישור קבוע לדף תשלום באשראי שהפקתם דרך חברת הסליקה שלכם (כמו משולם, PayPlus, אשורית וכו').</li>
+                </ul>
+
+                <div className="mt-6 bg-red-50 border border-red-100 text-red-800 p-4 rounded-xl font-medium">
+                  <strong>שימו לב:</strong> באחריותכם המלאה לוודא שהתשלום אכן נכנס לחשבונכם לפני שאתם אורזים ושולחים את הספר לקורא!
+                </div>
+              </div>
+              
+              <div className="mt-8">
+                <button 
+                  onClick={() => setIsHelpModalOpen(false)}
+                  className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl transition-colors"
+                >
+                  הבנתי, תודה!
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

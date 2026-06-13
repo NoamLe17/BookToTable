@@ -128,7 +128,7 @@ function CheckoutSuccessContent() {
                     className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-sm transition-all"
                   >
                     <CreditCard size={20} />
-                    שלם ₪{payment.amount.toFixed(2)} (Paybox/Bit)
+                    מעבר לעמוד התשלום של הסופר (אשראי / אפליקציות)
                   </a>
                 ) : (
                   <p className="text-sm text-red-600 font-medium bg-red-50 p-2 rounded">
