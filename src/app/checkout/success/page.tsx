@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { CheckCircle2, Package, ArrowRight, Hash } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useSearchParams } from 'next/navigation';
 
-export default function CheckoutSuccessPage() {
+function CheckoutSuccessContent() {
   const searchParams = useSearchParams();
   const orderIds = searchParams.get('orders')?.split(',') || [];
   useEffect(() => {
@@ -90,5 +90,13 @@ export default function CheckoutSuccessPage() {
         </Link>
       </div>
     </div>
+  );
+}
+
+export default function CheckoutSuccessPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center">טוען...</div>}>
+      <CheckoutSuccessContent />
+    </Suspense>
   );
 }
