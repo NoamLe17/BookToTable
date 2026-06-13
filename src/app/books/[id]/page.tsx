@@ -11,6 +11,25 @@ interface BookPageProps {
   params: Promise<{ id: string }>;
 }
 
+export async function generateMetadata({ params }: BookPageProps): Promise<import('next').Metadata> {
+  const resolvedParams = await params;
+  const book = await getBookById(resolvedParams.id);
+  
+  if (!book) {
+    return { title: 'ספר לא נמצא | BookToTable' };
+  }
+
+  return {
+    title: `${book.title} מאת ${book.authorName} | BookToTable`,
+    description: book.description.substring(0, 160) + '...',
+    openGraph: {
+      title: `${book.title} מאת ${book.authorName}`,
+      description: book.description.substring(0, 160) + '...',
+      images: book.coverUrl ? [{ url: book.coverUrl }] : [],
+    },
+  };
+}
+
 export default async function BookPage({ params }: BookPageProps) {
   // Await the params promise in Next.js 16/Turbopack
   const resolvedParams = await params;

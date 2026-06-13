@@ -1,0 +1,27 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Users (Authors) can only write to their own profile. Anyone can read.
+    match /users/{userId} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Books can be read by anyone, but only written by the author who owns the book.
+    match /books/{bookId} {
+      allow read: if true;
+      allow create: if request.auth != null && request.resource.data.authorId == request.auth.uid;
+      allow update, delete: if request.auth != null && resource.data.authorId == request.auth.uid;
+    }
+
+    // Orders are strictly restricted. Only the specific Author and the system can read/write them.
+    // Buyers do not need read access to the order document directly (they use server-side APIs or just see the success page state).
+    match /orders/{orderId} {
+      allow read: if request.auth != null && resource.data.authorId == request.auth.uid;
+      allow write: if request.auth != null && resource.data.authorId == request.auth.uid;
+      // Note: Creation of orders from the client is disabled (we do it securely via Serverless Function API).
+      allow create: if false; 
+    }
+  }
+}

@@ -82,11 +82,8 @@ export default function Navbar() {
               </div>
             ) : (
               <div className="flex items-center gap-3">
-                <Link href="/auth/login" className="text-gray-600 hover:text-green-600 font-medium px-2">
-                  התחברות
-                </Link>
-                <Link href="/authors/join" className="bg-green-600 hover:bg-green-700 text-white px-6 py-2.5 rounded-full font-bold transition-all shadow-md hover:shadow-lg">
-                  הצטרפות כסופר
+                <Link href="/auth/login" className="bg-green-600 hover:bg-green-700 text-white px-6 py-2.5 rounded-full font-bold transition-all shadow-md hover:shadow-lg">
+                  התחברות/הצטרפות כסופר
                 </Link>
               </div>
             )}
@@ -127,8 +124,7 @@ export default function Navbar() {
                 </>
               ) : (
                 <>
-                  <Link href="/auth/login" className="text-gray-700 font-medium" onClick={() => setMobileOpen(false)}>התחברות</Link>
-                  <Link href="/authors/join" className="bg-green-600 text-white text-center py-2.5 rounded-lg font-bold shadow-md" onClick={() => setMobileOpen(false)}>הצטרפות כסופר</Link>
+                  <Link href="/auth/login" className="bg-green-600 text-white text-center py-2.5 rounded-lg font-bold shadow-md" onClick={() => setMobileOpen(false)}>התחברות/הצטרפות כסופר</Link>
                 </>
               )}
             </div>

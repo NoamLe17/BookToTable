@@ -155,6 +155,20 @@ input:focus, textarea:focus, select:focus {
 .animate-pulse-green { animation: pulse-green 2s infinite; }
 .animate-float { animation: float 3s ease-in-out infinite; }
 
+@keyframes gradient-x {
+  0%, 100% {
+      background-size: 200% 200%;
+      background-position: left center;
+  }
+  50% {
+      background-size: 200% 200%;
+      background-position: right center;
+  }
+}
+.animate-gradient-x {
+  animation: gradient-x 3s ease infinite;
+}
+
 /* Loading skeleton */
 .skeleton {
   background: linear-gradient(90deg, #1a2e1a 25%, #1e3b2e 50%, #1a2e1a 75%);

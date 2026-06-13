@@ -7,7 +7,6 @@ export async function POST(request: Request) {
     const { readerDetails, itemsByAuthor, totalToPay, baseUrl } = body;
 
     // We need to map the cart items into PayPlus items
-    const payplusItems = [];
     const orderIds = [];
 
     // 1. Create orders in Firestore (Pending Payment Status)
@@ -17,12 +16,7 @@ export async function POST(request: Request) {
       let authorTotalAmount = 0; // Total books amount for this author
       
       for (const item of itemsList) {
-        // Build PayPlus item
-        payplusItems.push({
-          name: item.book.title,
-          quantity: item.quantity,
-          price: item.book.price
-        });
+
 
         authorTotalAmount += (item.book.price * item.quantity);
 

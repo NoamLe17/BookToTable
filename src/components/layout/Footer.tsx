@@ -24,10 +24,6 @@ export default function Footer() {
               הפלטפורמה הראשונה בישראל שמעצימה סופרים עצמאיים למכור ספרים ישירות לקוראים.
               שקיפות מלאה, 90% מהרווח אצלך – תמיד.
             </p>
-            <div className="flex items-center gap-1.5 mt-4">
-              <Leaf className="w-4 h-4 text-green-600" />
-              <span className="text-xs text-green-700 font-medium">מופעל באנרגיה ירוקה 100%</span>
-            </div>
             <div className="flex items-center gap-3 mt-6">
               <a href="#" className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-green-500 hover:text-white transition-all">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
@@ -48,8 +44,7 @@ export default function Footer() {
               {[
                 { href: '/', label: 'גלה ספרים' },
                 { href: '/about', label: 'אודות' },
-                { href: '/auth/register', label: 'הצטרף כסופר' },
-                { href: '/auth/login', label: 'התחברות' },
+                { href: '/auth/login', label: 'התחברות/הצטרפות כסופר' },
               ].map((link) => (
                 <li key={link.href}>
                   <Link href={link.href} className="text-sm text-gray-600 hover:text-green-600 transition-colors">
@@ -87,7 +82,7 @@ export default function Footer() {
             © {new Date().getFullYear()} BookToTable. כל הזכויות שמורות.
           </p>
           <div className="flex items-center gap-4 text-xs text-gray-500">
-            <span>🔒 תשלומים מאובטחים עם PayPlus</span>
+            <span>🔒 תשלום ישיר ובטוח לסופר</span>
             <span>·</span>
             <span>🚀 משלוח מהיר בישראל</span>
           </div>
@@ -111,7 +106,7 @@ export default function Footer() {
               </div>
               <div>
                 <h4 className="font-bold text-gray-900 mb-1">איך התשלום מועבר לסופר?</h4>
-                <p className="text-sm text-gray-600 leading-relaxed">באמצעות מערכת הסליקה המתקדמת שלנו, 90% מסכום הרכישה מועבר באופן אוטומטי ומיידי ישירות לחשבון הבנק של הסופר, ללא תחנות ביניים.</p>
+                <p className="text-sm text-gray-600 leading-relaxed">במודל הייחודי שלנו, התשלום מבוצע ישירות מהקורא לסופר (דרך Paybox, Bit, או אשראי). הסופר מקבל 100% מהסכום שהעברת אליו, ללא עמלות תיווך לפלטפורמה.</p>
               </div>
               <div>
                 <h4 className="font-bold text-gray-900 mb-1">מה קורה אם קניתי ספרים משני סופרים שונים?</h4>

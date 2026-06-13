@@ -14,23 +14,75 @@ export default async function HomePage() {
 
   return (
     <div className="page-transition bg-white min-h-screen">
-      <section className="relative h-[600px] flex items-center justify-center overflow-hidden bg-gray-900">
-        <div className="absolute inset-0 bg-gradient-to-r from-gray-900/90 to-gray-900/40 z-10"></div>
-        <div className="relative z-20 h-full flex flex-col items-center justify-center text-center px-4 max-w-4xl mx-auto">
-          <span className="bg-green-600 text-white px-4 py-1.5 rounded-full text-sm font-bold mb-6 tracking-wide shadow-sm">חדש!</span>
-          <h1 className="text-5xl md:text-7xl font-black text-white mb-6 leading-tight">
-            הבית של <span className="text-green-400">הסופרים העצמאיים</span>
+      <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden bg-[#0A0F1A]">
+        {/* Animated Background Gradients */}
+        <div className="absolute inset-0 z-0">
+          <div className="absolute top-1/4 left-1/4 w-[40rem] h-[40rem] bg-green-900/30 rounded-full blur-[120px] mix-blend-screen animate-pulse duration-[8000ms]"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-[35rem] h-[35rem] bg-blue-900/20 rounded-full blur-[100px] mix-blend-screen"></div>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_center,transparent_0%,#0A0F1A_100%)]"></div>
+          
+          {/* Subtle Grid Pattern overlay */}
+          <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150"></div>
+          <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_70%,transparent_100%)]"></div>
+        </div>
+
+        <div className="relative z-20 h-full flex flex-col items-center justify-center text-center px-4 max-w-5xl mx-auto mt-10">
+          
+          {/* Glassmorphic Badge */}
+          <div className="group cursor-default inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md mb-8 hover:bg-white/10 transition-all duration-300">
+            <span className="relative flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+            </span>
+            <span className="text-sm font-medium text-gray-300 tracking-wide group-hover:text-white transition-colors">
+              פלטפורמת הקריאה החדשה של ישראל
+            </span>
+          </div>
+
+          <h1 className="text-6xl md:text-8xl font-black text-white mb-6 leading-[1.1] tracking-tight">
+            הבית של <br className="md:hidden" />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-emerald-300 to-green-500 animate-gradient-x">
+              הסופרים העצמאיים
+            </span>
           </h1>
-          <p className="text-xl md:text-2xl text-gray-200 mb-10 font-medium leading-relaxed max-w-3xl">
-            פלטפורמה מהפכנית שמאפשרת לסופרים למכור את הספרים שלהם ישירות אליך - בלי פערי תיווך, ובלי רשתות שלוקחות את רוב הרווח.
+          
+          <p className="text-xl md:text-2xl text-gray-400 mb-12 font-medium leading-relaxed max-w-3xl">
+            מודל מהפכני שמאפשר לסופרים למכור ישירות אליך - <span className="text-white">בלי פערי תיווך</span> ובלי רשתות שלוקחות את רוב הרווח. הקורא מרוויח מחיר הוגן, הסופר מרוויח <span className="text-green-400">100% מהקנייה.</span>
           </p>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Link href="/books" className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-xl text-lg font-bold transition-all shadow-lg hover:shadow-green-900/20 flex items-center justify-center">
-              חנות הספרים <ArrowRight className="ml-2" size={20} />
+          
+          <div className="flex flex-col sm:flex-row gap-5 items-center justify-center w-full sm:w-auto">
+            <Link 
+              href="/books" 
+              className="group relative inline-flex items-center justify-center w-full sm:w-auto bg-green-500 hover:bg-green-400 text-white px-8 py-4 rounded-2xl text-lg font-bold transition-all duration-300 shadow-[0_0_40px_-10px_rgba(34,197,94,0.5)] hover:shadow-[0_0_60px_-15px_rgba(34,197,94,0.7)] hover:-translate-y-1"
+            >
+              <span className="relative z-10 flex items-center">
+                חנות הספרים 
+                <ArrowRight className="ml-2 transform group-hover:-translate-x-1 transition-transform" size={20} />
+              </span>
             </Link>
-            <Link href="/authors/join" className="bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/30 text-white px-8 py-4 rounded-xl text-lg font-bold transition-all flex items-center justify-center">
-              הצטרפות כסופר
+            
+            <Link 
+              href="/auth/login" 
+              className="group relative inline-flex items-center justify-center w-full sm:w-auto bg-white/5 hover:bg-white/10 backdrop-blur-lg border border-white/10 text-white px-8 py-4 rounded-2xl text-lg font-bold transition-all duration-300 hover:-translate-y-1"
+            >
+              התחברות/הצטרפות כסופר
             </Link>
+          </div>
+          
+          {/* Trust Indicators */}
+          <div className="mt-16 pt-8 border-t border-white/10 flex flex-wrap justify-center gap-8 md:gap-16 opacity-70">
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">📚</span>
+              <span className="text-sm font-medium text-gray-300">תמיכה ישירה ביוצרים</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">💳</span>
+              <span className="text-sm font-medium text-gray-300">תשלום ישיר ובטוח</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">📦</span>
+              <span className="text-sm font-medium text-gray-300">משלוח עד הבית</span>
+            </div>
           </div>
         </div>
       </section>

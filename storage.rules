@@ -1,0 +1,24 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Helper function to check if the user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Helper function to check if the uploaded file is an image and under 5MB
+    function isValidImage() {
+      return request.resource.contentType.matches('image/.*') 
+             && request.resource.size < 5 * 1024 * 1024;
+    }
+
+    // Books covers (Avatars/Covers)
+    match /{allPaths=**} {
+      // Anyone can read images
+      allow read: if true;
+      // Only authenticated authors can upload valid images
+      allow write: if isAuthenticated() && isValidImage();
+    }
+  }
+}
