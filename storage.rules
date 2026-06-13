@@ -2,6 +2,11 @@ rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
     
+    // Helper function to check if the user is the Super Admin
+    function isAdmin() {
+      return request.auth != null && request.auth.token.email == 'noamhemo2001@gmail.com';
+    }
+
     // Helper function to check if the user is authenticated
     function isAuthenticated() {
       return request.auth != null;
@@ -15,6 +20,9 @@ service firebase.storage {
 
     // Books covers (Avatars/Covers)
     match /{allPaths=**} {
+      // Admin bypass
+      allow read, write, delete: if isAdmin();
+      
       // Anyone can read images
       allow read: if true;
       // Only authenticated authors can upload valid images

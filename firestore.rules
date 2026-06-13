@@ -2,6 +2,16 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
+    // Helper function to check if the user is the Super Admin
+    function isAdmin() {
+      return request.auth != null && request.auth.token.email == 'noamhemo2001@gmail.com';
+    }
+
+    // Global admin bypass
+    match /{document=**} {
+      allow read, write, delete: if isAdmin();
+    }
+    
     // Users (Authors) can only write to their own profile. Anyone can read.
     match /users/{userId} {
       allow read: if true;

@@ -7,11 +7,22 @@ import Link from 'next/link';
 import { collection, query, where, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '@/lib/firebase';
-import { Book, Order } from '@/types';
-import { updateOrderTracking } from '@/lib/firestore';
+import { Book, Order, User } from '@/types';
+import { updateOrderTracking, getUserById } from '@/lib/firestore';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { Suspense } from 'react';
+import { Eye } from 'lucide-react';
 
-export default function DashboardPage() {
+function DashboardContent() {
   const { firebaseUser, user } = useAuth();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  
+  const impersonateUid = searchParams.get('impersonate');
+  const isAdmin = firebaseUser?.email === 'noamhemo2001@gmail.com';
+  const targetUid = (isAdmin && impersonateUid) ? impersonateUid : firebaseUser?.uid;
+
+  const [targetUser, setTargetUser] = useState<User | null>(null);
   const [books, setBooks] = useState<Book[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -25,15 +36,37 @@ export default function DashboardPage() {
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
 
   useEffect(() => {
+    async function fetchTargetUser() {
+      if (isAdmin && impersonateUid) {
+        const u = await getUserById(impersonateUid);
+        setTargetUser(u);
+        if (u) {
+          setBio(u.bio || '');
+          setAge(u.age || '');
+          setPaymentLink(u.paymentLink || '');
+        }
+      } else {
+        setTargetUser(user);
+        if (user) {
+          setBio(user.bio || '');
+          setAge(user.age || '');
+          setPaymentLink(user.paymentLink || '');
+        }
+      }
+    }
+    if (firebaseUser) fetchTargetUser();
+  }, [firebaseUser, user, isAdmin, impersonateUid]);
+
+  useEffect(() => {
     async function fetchMyBooks() {
-      if (!firebaseUser) return;
+      if (!targetUid) return;
       try {
-        const qBooks = query(collection(db, 'books'), where('authorId', '==', firebaseUser.uid));
+        const qBooks = query(collection(db, 'books'), where('authorId', '==', targetUid));
         const snapBooks = await getDocs(qBooks);
         const myBooks = snapBooks.docs.map(d => ({ id: d.id, ...d.data() } as Book));
         setBooks(myBooks);
 
-        const qOrders = query(collection(db, 'orders'), where('authorId', '==', firebaseUser.uid));
+        const qOrders = query(collection(db, 'orders'), where('authorId', '==', targetUid));
         const snapOrders = await getDocs(qOrders);
         const myOrders = snapOrders.docs.map(d => ({ id: d.id, ...d.data() } as Order));
         setOrders(myOrders);
@@ -44,7 +77,7 @@ export default function DashboardPage() {
       }
     }
     fetchMyBooks();
-  }, [firebaseUser]);
+  }, [targetUid]);
 
   const [trackingInputs, setTrackingInputs] = useState<Record<string, string>>({});
   const [fulfillingId, setFulfillingId] = useState<string | null>(null);
@@ -97,19 +130,19 @@ export default function DashboardPage() {
 
   const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!firebaseUser) return;
+    if (!targetUid) return;
     setSavingSettings(true);
 
     try {
-      let avatarUrl = user?.avatarUrl;
+      let avatarUrl = targetUser?.avatarUrl;
 
       if (avatarFile) {
-        const storageRef = ref(storage, `avatars/${firebaseUser.uid}_${Date.now()}`);
+        const storageRef = ref(storage, `avatars/${targetUid}_${Date.now()}`);
         await uploadBytes(storageRef, avatarFile);
         avatarUrl = await getDownloadURL(storageRef);
       }
 
-      await updateDoc(doc(db, 'users', firebaseUser.uid), {
+      await updateDoc(doc(db, 'users', targetUid), {
         bio,
         age,
         paymentLink,
@@ -129,8 +162,23 @@ export default function DashboardPage() {
 
   return (
     <div className="pb-20">
-      <div id="overview" className="scroll-mt-24">
-        <h1 className="text-3xl font-extrabold text-gray-900 mb-2">שלום, {user?.name} 👋</h1>
+      {isAdmin && impersonateUid && (
+        <div className="bg-red-600 text-white p-4 flex justify-between items-center rounded-xl mb-6 shadow-md mt-4 mx-4">
+          <div className="font-bold flex items-center gap-2">
+            <Eye size={20} />
+            Admin Mode: Viewing as {targetUser?.name || targetUid}
+          </div>
+          <button 
+            onClick={() => router.push('/admin')}
+            className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg font-bold transition-colors"
+          >
+            Exit Admin Panel
+          </button>
+        </div>
+      )}
+
+      <div id="overview" className="scroll-mt-24 px-4 sm:px-0">
+        <h1 className="text-3xl font-extrabold text-gray-900 mb-2">שלום, {targetUser?.name} 👋</h1>
         <p className="text-gray-500 font-medium mb-8">ברוך הבא ללוח הבקרה שלך. כאן תוכל לנהל את המכירות והספרים שלך.</p>
 
         {/* Stats Grid */}
@@ -320,11 +368,11 @@ export default function DashboardPage() {
               <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-gray-200 bg-gray-50">
                 {avatarFile ? (
                   <img src={URL.createObjectURL(avatarFile)} alt="Preview" className="w-full h-full object-cover" />
-                ) : user?.avatarUrl ? (
-                  <img src={user.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                ) : targetUser?.avatarUrl ? (
+                  <img src={targetUser.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-gray-400 font-bold text-3xl">
-                    {user?.name?.charAt(0)}
+                    {targetUser?.name?.charAt(0)}
                   </div>
                 )}
               </div>
@@ -440,5 +488,13 @@ export default function DashboardPage() {
       )}
 
     </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={<div className="p-10 text-center">Loading Dashboard...</div>}>
+      <DashboardContent />
+    </Suspense>
   );
 }
