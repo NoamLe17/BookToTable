@@ -32,7 +32,7 @@ export default function HeroSection() {
                 <span>גלה ספרים</span>
               </Link>
               <Link 
-                href="/authors/join" 
+                href="/auth/login" 
                 className="bg-white border border-gray-200 hover:border-green-300 hover:bg-green-50 text-gray-700 font-bold py-3 px-8 rounded-full shadow-sm transition-all text-lg flex items-center justify-center gap-2"
               >
                 <TrendingUp size={20} className="text-green-600" />

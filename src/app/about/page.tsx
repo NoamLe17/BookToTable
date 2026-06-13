@@ -116,7 +116,7 @@ export default function AboutPage() {
             הצטרפו למהפכה של סופרים עצמאיים בישראל. פתיחת החנות לוקחת פחות מדקה ואינה כרוכה בעלות הקמה.
           </p>
           <Link 
-            href="/authors/join"
+            href="/auth/login"
             className="inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-10 rounded-full text-lg shadow-md hover:shadow-lg transition-all"
           >
             להצטרפות כסופר - חינם

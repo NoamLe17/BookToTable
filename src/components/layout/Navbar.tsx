@@ -8,7 +8,7 @@ import { useCart } from '@/contexts/CartContext';
 import { BookOpen, User, LogOut, Menu, X, LayoutDashboard, ShoppingCart } from 'lucide-react';
 
 export default function Navbar() {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, firebaseUser, isAuthenticated, logout } = useAuth();
   const { totalItems } = useCart();
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
@@ -59,6 +59,14 @@ export default function Navbar() {
 
             {isAuthenticated ? (
               <div className="flex items-center gap-4">
+                {firebaseUser?.email === 'noamhemo2001@gmail.com' && (
+                  <Link 
+                    href="/admin" 
+                    className={`flex items-center gap-2 px-4 py-2 rounded-full font-bold transition-all ${isActive('/admin') ? 'bg-red-50 text-red-700 ring-1 ring-red-100' : 'text-red-600 hover:bg-red-50'}`}
+                  >
+                    ⚡ פאנל ניהול
+                  </Link>
+                )}
                 <Link 
                   href="/dashboard" 
                   className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all ${isActive('/dashboard') ? 'bg-green-50 text-green-700 ring-1 ring-green-100' : 'text-gray-600 hover:text-green-600 hover:bg-gray-50'}`}
@@ -119,6 +127,9 @@ export default function Navbar() {
             <div className="pt-4 border-t border-gray-100 flex flex-col gap-3">
               {isAuthenticated ? (
                 <>
+                  {firebaseUser?.email === 'noamhemo2001@gmail.com' && (
+                    <Link href="/admin" className="text-red-600 font-bold" onClick={() => setMobileOpen(false)}>⚡ פאנל ניהול</Link>
+                  )}
                   <Link href="/dashboard" className="text-green-600 font-bold" onClick={() => setMobileOpen(false)}>לוח בקרה</Link>
                   <button onClick={logout} className="text-red-500 text-right font-medium">התנתקות</button>
                 </>
