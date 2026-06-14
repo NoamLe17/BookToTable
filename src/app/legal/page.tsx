@@ -105,15 +105,15 @@ export default function LegalPage() {
 
             <p>
               • הנהלת האתר שומרת לעצמה את הזכות לעדכן או לשנות את התקנון ומדיניות הפרטיות בכל עת וללא הודעה מוקדמת. הנוסח המחייב הוא זה המפורסם באתר בעת הרכישה או השימוש.<br />
-              • על תקנון זה יחולו דיני מדינת ישראל בלבד. סמכות השיפוט הבלעדית לכל עניין או מחלוקת הנובעת מתקנון זה תהא נתונה לבתי המשפט המוסמכים במחוז תל אביב-יפו.
+              • על תקנון זה יחולו דיני מדינת ישראל בלבד. סמכות השיפוט הבלעדית לכל עניין או מחלוקת הנובעת מתקנון זה תהא נתונה לבתי המשפט המוסמכים בישראל.
             </p>
 
           </div>
 
           <div className="mt-16 pt-8 border-t border-gray-100 text-center">
-            <h4 className="font-bold text-gray-900 mb-2">ליצירת קשר ופניות משפטיות:</h4>
-            <a href="mailto:hello@booktotable.co.il" className="text-green-600 hover:text-green-800 font-medium transition-colors">
-              hello@booktotable.co.il
+            <h4 className="font-bold text-gray-900 mb-2">ליצירת קשר:</h4>
+            <a href="mailto:noamhemo2001@gmail.com" className="text-green-600 hover:text-green-800 font-medium transition-colors">
+              noamhemo2001@gmail.com
             </a>
           </div>
         </div>

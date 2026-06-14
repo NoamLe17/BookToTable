@@ -31,7 +31,7 @@ export default function Footer() {
               <a href="#" className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-green-500 hover:text-white transition-all">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg>
               </a>
-              <a href="mailto:hello@booktotable.co.il" className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-green-500 hover:text-white transition-all">
+              <a href="mailto:noamhemo2001@gmail.com" className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-green-500 hover:text-white transition-all">
                 <Mail className="w-4 h-4" />
               </a>
             </div>
@@ -131,9 +131,9 @@ export default function Footer() {
               <p className="text-sm text-gray-600 mb-6 leading-relaxed">
                 נשמח לעמוד לשירותך בכל שאלה. תוכל לשלוח לנו הודעה ישירות למייל, ואנו נשתדל לענות בהקדם האפשרי.
               </p>
-              <a href="mailto:hello@booktotable.co.il" className="flex items-center justify-center gap-3 w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-xl font-bold transition-all">
+              <a href="mailto:noamhemo2001@gmail.com" className="flex items-center justify-center gap-3 w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-xl font-bold transition-all">
                 <Mail size={20} />
-                שלח אימייל (hello@booktotable.co.il)
+                שלח אימייל (noamhemo2001@gmail.com)
               </a>
             </div>
           </div>
