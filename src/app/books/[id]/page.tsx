@@ -112,8 +112,8 @@ export default async function BookPage({ params }: BookPageProps) {
             </div>
 
             {/* Left Side - Book Cover Image */}
-            <div className="bg-gray-50 p-8 md:p-16 flex items-center justify-center order-1 md:order-2 border-r border-gray-100">
-              <div className="relative w-full max-w-sm aspect-[2/3] shadow-2xl rounded-r-2xl rounded-l-md overflow-hidden transform hover:-translate-y-2 transition-transform duration-500">
+            <div className="bg-gray-50 p-6 md:p-12 flex items-center justify-center order-1 md:order-2 border-r border-gray-100">
+              <div className="relative w-48 sm:w-56 md:w-64 lg:w-72 aspect-[2/3] shadow-2xl rounded-r-2xl rounded-l-md overflow-hidden transform hover:-translate-y-2 transition-transform duration-500">
                 {book.coverUrl ? (
                   <img 
                     src={book.coverUrl} 
