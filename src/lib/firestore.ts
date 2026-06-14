@@ -12,6 +12,7 @@ import {
   limit,
   Timestamp,
   setDoc,
+  increment,
 } from 'firebase/firestore';
 import { db } from './firebase';
 import { Book, Order, User, FanMail } from '@/types';
@@ -133,6 +134,18 @@ export async function createOrder(data: Omit<Order, 'id' | 'createdAt'>): Promis
     ...data,
     createdAt: Timestamp.now(),
   });
+
+  // Increment the sales count of the purchased book
+  if (data.bookId) {
+    try {
+      await updateDoc(doc(db, 'books', data.bookId), {
+        salesCount: increment(data.quantity || 1)
+      });
+    } catch (e) {
+      console.error('Failed to increment sales count:', e);
+    }
+  }
+
   return docRef.id;
 }
 

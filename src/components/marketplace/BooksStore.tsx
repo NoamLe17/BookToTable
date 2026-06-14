@@ -122,7 +122,7 @@ export default function BooksStore({ books }: { books: Book[] }) {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {filteredBooks.map((book) => (
                 <Link key={book.id} href={`/books/${book.id}`} className="group bg-white border border-gray-100 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                   <div className="aspect-[2/3] w-full bg-gray-50 relative overflow-hidden">
