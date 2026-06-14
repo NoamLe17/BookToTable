@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Settings, HelpCircle, X } from 'lucide-react';
 import { doc, updateDoc } from 'firebase/firestore';
@@ -10,7 +10,7 @@ import { User } from '@/types';
 import { useSearchParams } from 'next/navigation';
 import { getUserById } from '@/lib/firestore';
 
-export default function ProfilePage() {
+function ProfileContent() {
   const { firebaseUser, user } = useAuth();
   const searchParams = useSearchParams();
   
@@ -218,5 +218,13 @@ export default function ProfilePage() {
       )}
 
     </div>
+  );
+}
+
+export default function ProfilePage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-gray-500">טוען פרופיל...</div>}>
+      <ProfileContent />
+    </Suspense>
   );
 }
