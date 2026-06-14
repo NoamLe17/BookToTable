@@ -73,6 +73,11 @@ export default function Footer() {
                   מדיניות פרטיות ותנאי שימוש
                 </Link>
               </li>
+              <li>
+                <Link href="/accessibility" className="text-sm text-gray-600 hover:text-green-600 transition-colors">
+                  הצהרת נגישות
+                </Link>
+              </li>
             </ul>
           </div>
         </div>
