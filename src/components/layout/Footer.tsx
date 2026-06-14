@@ -21,8 +21,8 @@ export default function Footer() {
               <span className="font-black text-2xl gradient-text">BookToTable</span>
             </Link>
             <p className="text-gray-600 text-sm leading-relaxed max-w-sm">
-              הפלטפורמה הראשונה בישראל שמעצימה סופרים עצמאיים למכור ספרים ישירות לקוראים.
-              שקיפות מלאה, 90% מהרווח אצלך – תמיד.
+              פלטפורמה דיגיטלית המעצימה סופרים עצמאיים למכור ספרים ישירות לקוראים. 
+              מודל הוגן ושקוף – פרט לעלויות שילוח וסליקה, כל הכסף מהמכירה הולך ישירות אליכם.
             </p>
             <div className="flex items-center gap-3 mt-6">
               <a href="#" className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-green-500 hover:text-white transition-all">
