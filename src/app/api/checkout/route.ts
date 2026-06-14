@@ -28,6 +28,7 @@ export async function POST(request: Request) {
           bookId: item.book.id,
           bookTitle: item.book.title,
           authorId: item.book.authorId,
+          quantity: item.quantity,
           readerDetails: readerDetails,
           shippingCompany: 'cheetah', // Default MVP
           shippingFee: itemShippingFee,
@@ -94,8 +95,11 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ url: successUrl.toString() });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Checkout API Error:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json(
+      { error: error?.message || 'Internal Server Error', stack: error?.stack },
+      { status: 500 }
+    );
   }
 }

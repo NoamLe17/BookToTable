@@ -73,11 +73,11 @@ export default function CheckoutPage() {
         }),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to generate checkout link');
-      }
-
       const responseData = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(responseData.error || 'Failed to generate checkout link');
+      }
       
       clearCart();
       
@@ -88,9 +88,9 @@ export default function CheckoutPage() {
         throw new Error('No payment URL returned');
       }
       
-    } catch (error) {
+    } catch (error: any) {
       console.error("Checkout failed:", error);
-      alert("אירעה שגיאה ביצירת עמוד התשלום. אנא נסה שנית.");
+      alert(`אירעה שגיאה ביצירת עמוד התשלום: ${error.message}`);
       setIsSubmitting(false);
     }
   };
