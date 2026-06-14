@@ -153,6 +153,7 @@ function DashboardContent() {
       comparison = a.status.localeCompare(b.status);
       if (sortDirection === 'desc') comparison = -comparison;
     }
+    return comparison;
   });
 
   const activeOrders = sortedOrders.filter(o => o.status !== 'delivered');
