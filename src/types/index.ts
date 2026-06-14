@@ -52,6 +52,7 @@ export interface Order {
     zip: string;
     buyerNote?: string;
   };
+  quantity: number;
   shippingCompany: ShippingCompany;
   shippingFee: number;
   totalPaid: number;

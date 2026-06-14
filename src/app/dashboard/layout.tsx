@@ -4,28 +4,35 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import { LayoutDashboard, Book, Settings, LogOut, Package } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth();
   const [activeSection, setActiveSection] = useState('overview');
 
+  const pathname = usePathname();
+
   useEffect(() => {
-    // Basic active state based on URL hash
+    // Basic active state based on URL hash or pathname
     const handleHashChange = () => {
-      const hash = window.location.hash.replace('#', '') || 'overview';
-      setActiveSection(hash);
+      if (pathname === '/dashboard/profile') {
+        setActiveSection('profile');
+      } else {
+        const hash = window.location.hash.replace('#', '') || 'overview';
+        setActiveSection(hash);
+      }
     };
     
     handleHashChange();
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
-  }, []);
+  }, [pathname]);
 
   const navItems = [
     { name: 'ראשי', href: '#overview', id: 'overview', icon: LayoutDashboard },
     { name: 'הספרים שלי', href: '#books', id: 'books', icon: Book },
     { name: 'הזמנות', href: '#orders', id: 'orders', icon: Package },
-    { name: 'עריכת פרופיל', href: '#settings', id: 'settings', icon: Settings },
+    { name: 'עריכת פרופיל', href: '/dashboard/profile', id: 'profile', icon: Settings },
   ];
 
   return (
@@ -50,6 +57,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <nav className="space-y-2">
             {navItems.map((item) => {
               const isActive = activeSection === item.id;
+              if (item.href.startsWith('/')) {
+                return (
+                  <Link
+                    key={item.id}
+                    href={item.href}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium border-2 ${
+                      isActive
+                        ? 'bg-green-50 text-green-700 border-green-200 shadow-sm'
+                        : 'border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                    }`}
+                  >
+                    <item.icon size={18} className={isActive ? 'text-green-600' : 'text-gray-400'} />
+                    {item.name}
+                  </Link>
+                );
+              }
+
               return (
                 <a
                   key={item.id}
