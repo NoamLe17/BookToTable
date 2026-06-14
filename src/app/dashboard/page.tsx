@@ -2,12 +2,12 @@
 
 import React, { useEffect, useState, Suspense } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { Book as BookIcon, DollarSign, TrendingUp, Package, Eye, ChevronUp, ChevronDown } from 'lucide-react';
+import { Book as BookIcon, DollarSign, TrendingUp, Package, Eye, ChevronUp, ChevronDown, X } from 'lucide-react';
 import Link from 'next/link';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Book, Order, User } from '@/types';
-import { updateOrderTracking, getUserById } from '@/lib/firestore';
+import { updateOrderTracking, getUserById, updateOrderStatus } from '@/lib/firestore';
 import { useSearchParams, useRouter } from 'next/navigation';
 
 type SortColumn = 'date' | 'quantity' | 'totalPaid' | 'status';
@@ -67,6 +67,8 @@ function DashboardContent() {
 
   const [trackingInputs, setTrackingInputs] = useState<Record<string, string>>({});
   const [fulfillingId, setFulfillingId] = useState<string | null>(null);
+  const [completingId, setCompletingId] = useState<string | null>(null);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
 
   const handleFulfillOrder = async (order: Order) => {
     const trackingNumber = trackingInputs[order.id];
@@ -104,6 +106,19 @@ function DashboardContent() {
     }
   };
 
+  const handleCompleteOrder = async (order: Order) => {
+    setCompletingId(order.id);
+    try {
+      await updateOrderStatus(order.id, 'delivered');
+      setOrders(orders.map(o => o.id === order.id ? { ...o, status: 'delivered' } : o));
+    } catch (error) {
+      console.error('Failed to complete order:', error);
+      alert('אירעה שגיאה. נסה שנית.');
+    } finally {
+      setCompletingId(null);
+    }
+  };
+
   const totalRevenue = orders.reduce((sum, order) => sum + order.splitAuthor, 0);
   const openOrdersCount = orders.filter(o => o.status === 'pending').length;
 
@@ -138,8 +153,10 @@ function DashboardContent() {
       comparison = a.status.localeCompare(b.status);
       if (sortDirection === 'desc') comparison = -comparison;
     }
-    return comparison;
   });
+
+  const activeOrders = sortedOrders.filter(o => o.status !== 'delivered');
+  const historyOrders = sortedOrders.filter(o => o.status === 'delivered');
 
   const renderSortIcon = (column: SortColumn) => {
     if (sortColumn !== column) return null;
@@ -264,7 +281,7 @@ function DashboardContent() {
 
         {loading ? (
           <div className="text-center py-10 text-gray-500">טוען נתונים...</div>
-        ) : orders.length === 0 ? (
+        ) : activeOrders.length === 0 ? (
           <div className="text-center py-12 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
             <Package size={48} className="mx-auto text-gray-300 mb-4" />
             <h3 className="text-lg font-bold text-gray-900 mb-2">אין לך עדיין הזמנות</h3>
@@ -293,7 +310,7 @@ function DashboardContent() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {sortedOrders.map((order) => (
+                {activeOrders.map((order) => (
                   <tr key={order.id} className="hover:bg-gray-50 transition-colors">
                     <td className="p-3 text-gray-500">
                       {new Date(order.createdAt).toLocaleDateString('he-IL', {
@@ -359,6 +376,13 @@ function DashboardContent() {
                           <span className="text-xs text-gray-500 dir-ltr text-right">
                             מעקב: {order.trackingNumber}
                           </span>
+                          <button
+                            onClick={() => handleCompleteOrder(order)}
+                            disabled={completingId === order.id}
+                            className="bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold px-2 py-1 rounded text-xs transition-all w-fit mt-1 border border-gray-200"
+                          >
+                            {completingId === order.id ? '...' : 'סמן כהושלם (הגיע ליעד)'}
+                          </button>
                         </div>
                       )}
                     </td>
@@ -368,7 +392,68 @@ function DashboardContent() {
             </table>
           </div>
         )}
+
+        {/* History Link */}
+        <div className="text-center mt-6">
+          <button
+            onClick={() => setShowHistoryModal(true)}
+            className="text-gray-500 hover:text-green-600 font-medium text-sm transition-colors underline decoration-dashed underline-offset-4"
+          >
+            צפה בהיסטוריית הזמנות ({historyOrders.length})
+          </button>
+        </div>
       </div>
+
+      {/* History Modal */}
+      {showHistoryModal && (
+        <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[80vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50">
+              <h2 className="text-xl font-bold text-gray-900">היסטוריית הזמנות (הושלמו)</h2>
+              <button onClick={() => setShowHistoryModal(false)} className="text-gray-400 hover:text-gray-600">
+                <X size={24} />
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto flex-1">
+              {historyOrders.length === 0 ? (
+                <div className="text-center py-10 text-gray-500">אין הזמנות שהושלמו עדיין.</div>
+              ) : (
+                <table className="w-full text-right text-sm">
+                  <thead>
+                    <tr className="border-b border-gray-200 bg-gray-50 text-gray-600">
+                      <th className="p-3 font-bold">תאריך</th>
+                      <th className="p-3 font-bold">ספר</th>
+                      <th className="p-3 font-bold">כמות</th>
+                      <th className="p-3 font-bold">פרטי לקוח</th>
+                      <th className="p-3 font-bold">תשלום</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {historyOrders.map((order) => (
+                      <tr key={order.id} className="hover:bg-gray-50 transition-colors opacity-80">
+                        <td className="p-3 text-gray-500">
+                          {new Date(order.createdAt).toLocaleDateString('he-IL', {
+                            day: '2-digit', month: '2-digit', year: 'numeric'
+                          })}
+                        </td>
+                        <td className="p-3 font-medium text-gray-900">{order.bookTitle}</td>
+                        <td className="p-3 font-bold text-gray-900">{order.quantity || 1}</td>
+                        <td className="p-3">
+                          <div className="text-gray-900 font-medium">{order.readerDetails.name}</div>
+                          <div className="text-gray-500 text-xs mt-1">
+                            {order.readerDetails.address}, {order.readerDetails.city}
+                          </div>
+                        </td>
+                        <td className="p-3 font-medium text-gray-900">₪{order.splitAuthor.toFixed(2)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
