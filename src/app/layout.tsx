@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Heebo } from 'next/font/google';
+import Script from 'next/script';
 import './globals.css';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -34,6 +35,21 @@ export default function RootLayout({
   return (
     <html lang="he" dir="rtl" className={heebo.variable}>
       <body className="bg-gray-50 text-gray-900 font-heebo antialiased min-h-screen">
+        {/* Google Analytics */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-YDYTJNPN5X"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+  
+            gtag('config', 'G-YDYTJNPN5X');
+          `}
+        </Script>
+
         <CartProvider>
           <Toaster
             position="top-center"
