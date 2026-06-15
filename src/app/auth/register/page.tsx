@@ -14,6 +14,10 @@ const registerSchema = z.object({
   email: z.string().email('כתובת אימייל לא חוקית'),
   password: z.string().min(6, 'סיסמה חייבת להכיל לפחות 6 תווים'),
   bio: z.string().max(500, 'ביוגרפיה ארוכה מדי').optional(),
+  phone: z.string().min(9, 'מספר טלפון לא חוקי'),
+  pickupCity: z.string().min(2, 'עיר איסוף נדרשת'),
+  pickupStreet: z.string().min(2, 'רחוב איסוף נדרש'),
+  pickupZip: z.string().min(5, 'מיקוד נדרש'),
 });
 
 type RegisterFormData = z.infer<typeof registerSchema>;
@@ -36,7 +40,12 @@ export default function AuthorRegisterPage() {
     setIsSubmitting(true);
     try {
       // Create user in Firebase via useAuth hook
-      await registerAuth(data.email, data.password, data.name);
+      await registerAuth(data.email, data.password, data.name, false, {
+        phone: data.phone,
+        city: data.pickupCity,
+        street: data.pickupStreet,
+        zip: data.pickupZip
+      });
       setSuccess(true);
       setTimeout(() => {
         router.push('/dashboard');
@@ -168,6 +177,58 @@ export default function AuthorRegisterPage() {
                   placeholder="סופר ילדים, אוהב חתולים..."
                 />
                 {errors.bio && <p className="mt-1 text-sm text-red-600">{errors.bio.message}</p>}
+              </div>
+
+              {/* Phone */}
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-1">
+                  טלפון נייד
+                </label>
+                <input
+                  {...register('phone')}
+                  type="tel"
+                  className="w-full bg-white border border-gray-300 rounded-lg py-2.5 px-4 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all shadow-sm"
+                  placeholder="050-0000000"
+                  dir="ltr"
+                />
+                {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone.message}</p>}
+              </div>
+
+              {/* Pickup Address */}
+              <div className="pt-2 border-t border-gray-100">
+                <h3 className="text-md font-bold text-gray-900 mb-4">כתובת איסוף חבילות (לשליח)</h3>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-1">עיר</label>
+                      <input
+                        {...register('pickupCity')}
+                        type="text"
+                        className="w-full bg-white border border-gray-300 rounded-lg py-2.5 px-4 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all shadow-sm"
+                      />
+                      {errors.pickupCity && <p className="mt-1 text-sm text-red-600">{errors.pickupCity.message}</p>}
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-1">מיקוד</label>
+                      <input
+                        {...register('pickupZip')}
+                        type="text"
+                        className="w-full bg-white border border-gray-300 rounded-lg py-2.5 px-4 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all shadow-sm"
+                      />
+                      {errors.pickupZip && <p className="mt-1 text-sm text-red-600">{errors.pickupZip.message}</p>}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-1">רחוב ומספר</label>
+                    <input
+                      {...register('pickupStreet')}
+                      type="text"
+                      className="w-full bg-white border border-gray-300 rounded-lg py-2.5 px-4 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all shadow-sm"
+                      placeholder="הרקפת 12, דירה 4"
+                    />
+                    {errors.pickupStreet && <p className="mt-1 text-sm text-red-600">{errors.pickupStreet.message}</p>}
+                  </div>
+                </div>
               </div>
 
               {/* Submit Button */}

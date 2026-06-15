@@ -24,6 +24,10 @@ function ProfileContent() {
   const [bio, setBio] = useState(user?.bio || '');
   const [age, setAge] = useState(user?.age || '');
   const [paymentLink, setPaymentLink] = useState(user?.paymentLink || '');
+  const [phone, setPhone] = useState(user?.pickupAddress?.phone || '');
+  const [pickupCity, setPickupCity] = useState(user?.pickupAddress?.city || '');
+  const [pickupStreet, setPickupStreet] = useState(user?.pickupAddress?.street || '');
+  const [pickupZip, setPickupZip] = useState(user?.pickupAddress?.zip || '');
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [savingSettings, setSavingSettings] = useState(false);
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
@@ -37,6 +41,10 @@ function ProfileContent() {
           setBio(u.bio || '');
           setAge(u.age || '');
           setPaymentLink(u.paymentLink || '');
+          setPhone(u.pickupAddress?.phone || '');
+          setPickupCity(u.pickupAddress?.city || '');
+          setPickupStreet(u.pickupAddress?.street || '');
+          setPickupZip(u.pickupAddress?.zip || '');
         }
       } else {
         setTargetUser(user);
@@ -44,6 +52,10 @@ function ProfileContent() {
           setBio(user.bio || '');
           setAge(user.age || '');
           setPaymentLink(user.paymentLink || '');
+          setPhone(user.pickupAddress?.phone || '');
+          setPickupCity(user.pickupAddress?.city || '');
+          setPickupStreet(user.pickupAddress?.street || '');
+          setPickupZip(user.pickupAddress?.zip || '');
         }
       }
     }
@@ -68,6 +80,12 @@ function ProfileContent() {
         bio,
         age,
         paymentLink,
+        pickupAddress: {
+          phone,
+          city: pickupCity,
+          street: pickupStreet,
+          zip: pickupZip,
+        },
         ...(avatarUrl && { avatarUrl })
       });
 
@@ -160,6 +178,55 @@ function ProfileContent() {
                   className="w-full bg-gray-50 border border-gray-200 rounded-lg py-2.5 px-4 focus:outline-none focus:ring-2 focus:ring-green-500 resize-none"
                   placeholder="ספר לקוראים קצת על עצמך, מאיפה ההשראה שלך לספרים..."
                 ></textarea>
+              </div>
+
+              <div className="pt-4 border-t border-gray-100">
+                <h3 className="text-md font-bold text-gray-900 mb-4">פרטי איסוף לשליח</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-1">טלפון נייד לאיסוף</label>
+                    <input 
+                      type="tel" 
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      className="w-full bg-gray-50 border border-gray-200 rounded-lg py-2.5 px-4 focus:outline-none focus:ring-2 focus:ring-green-500"
+                      dir="ltr"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-1">עיר איסוף</label>
+                    <input 
+                      type="text" 
+                      value={pickupCity}
+                      onChange={(e) => setPickupCity(e.target.value)}
+                      className="w-full bg-gray-50 border border-gray-200 rounded-lg py-2.5 px-4 focus:outline-none focus:ring-2 focus:ring-green-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-1">מיקוד איסוף</label>
+                    <input 
+                      type="text" 
+                      value={pickupZip}
+                      onChange={(e) => setPickupZip(e.target.value)}
+                      className="w-full bg-gray-50 border border-gray-200 rounded-lg py-2.5 px-4 focus:outline-none focus:ring-2 focus:ring-green-500"
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-1">רחוב ומספר איסוף</label>
+                  <input 
+                    type="text" 
+                    value={pickupStreet}
+                    onChange={(e) => setPickupStreet(e.target.value)}
+                    className="w-full bg-gray-50 border border-gray-200 rounded-lg py-2.5 px-4 focus:outline-none focus:ring-2 focus:ring-green-500"
+                    placeholder="הרקפת 12, דירה 4"
+                  />
+                </div>
               </div>
 
               <div className="pt-2">

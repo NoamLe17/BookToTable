@@ -8,6 +8,8 @@ import { z } from 'zod';
 import { useRouter } from 'next/navigation';
 import { ShieldCheck, Truck, ArrowRight, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { calculateDistance } from '@/lib/distance';
+import { getUserById } from '@/lib/firestore';
 
 const checkoutSchema = z.object({
   name: z.string().min(2, 'שם מלא נדרש'),
@@ -60,6 +62,38 @@ export default function CheckoutPage() {
     setIsSubmitting(true);
 
     try {
+      // Calculate distance for each author's pickup address
+      let extraShippingFee = 0;
+      let hasFarAuthor = false;
+
+      const authorIds = Object.keys(itemsByAuthor);
+      
+      for (const authorId of authorIds) {
+        const authorUser = await getUserById(authorId);
+        if (authorUser && authorUser.pickupAddress && authorUser.pickupAddress.city) {
+          const authorAddr = `${authorUser.pickupAddress.street}, ${authorUser.pickupAddress.city}, ${authorUser.pickupAddress.zip || ''}`;
+          const customerAddr = `${data.address}, ${data.city}, ${data.zip}`;
+          
+          const distance = await calculateDistance(authorAddr, customerAddr);
+          if (distance !== null && distance > 40) {
+            hasFarAuthor = true;
+            extraShippingFee += 15;
+          }
+        }
+      }
+
+      if (hasFarAuthor) {
+        const confirmed = window.confirm(
+          `לקוח יקר, כתובת האריזה של הסופר רחוקה במיוחד מהכתובת שהזנת למשלוח.\nבהתאם לזאת, אנו נדרשים להוסיף ${extraShippingFee} ₪ דמי משלוח מיוחדים לסכום הרכישה.\n\nהאם לאשר ולהמשיך לתשלום?`
+        );
+        if (!confirmed) {
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
+      const finalTotalToPay = totalToPay + extraShippingFee;
+
       const baseUrl = window.location.origin;
 
       const response = await fetch('/api/checkout', {
@@ -68,7 +102,7 @@ export default function CheckoutPage() {
         body: JSON.stringify({
           readerDetails: data,
           itemsByAuthor,
-          totalToPay,
+          totalToPay: finalTotalToPay,
           baseUrl
         }),
       });
