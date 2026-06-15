@@ -70,7 +70,8 @@ export default function CheckoutPage() {
     };
   }, [items]);
 
-  const totalToPay = totalPrice + baseShippingFee + extraShippingFee;
+  const discount = shippingMethod === 'self_pickup' ? totalPrice * 0.10 : 0;
+  const totalToPay = totalPrice + baseShippingFee + extraShippingFee - discount;
 
   // Fetch authors data on mount
   useEffect(() => {
@@ -414,8 +415,8 @@ export default function CheckoutPage() {
                 )}
                 {shippingMethod === 'self_pickup' && (
                   <div className="flex justify-between">
-                    <span>איסוף עצמי</span>
-                    <span className="text-green-600 font-bold">חינם</span>
+                    <span>איסוף עצמי (10% הנחה)</span>
+                    <span className="text-green-600 font-bold">-₪{discount.toFixed(2)}</span>
                   </div>
                 )}
               </div>
