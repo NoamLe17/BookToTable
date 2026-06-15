@@ -18,6 +18,17 @@ const registerSchema = z.object({
   pickupCity: z.string().min(2, 'עיר איסוף נדרשת'),
   pickupStreet: z.string().min(2, 'רחוב איסוף נדרש'),
   pickupZip: z.string().min(5, 'מיקוד נדרש'),
+  hasBit: z.boolean().optional(),
+  bitPhone: z.string().optional(),
+  hasPaybox: z.boolean().optional(),
+  payboxLink: z.string().optional(),
+  hasBankTransfer: z.boolean().optional(),
+  bankName: z.string().optional(),
+  bankBranch: z.string().optional(),
+  bankAccount: z.string().optional(),
+  bankAccountName: z.string().optional(),
+  hasCreditCard: z.boolean().optional(),
+  creditCardLink: z.string().optional(),
 });
 
 type RegisterFormData = z.infer<typeof registerSchema>;
@@ -31,21 +42,47 @@ export default function AuthorRegisterPage() {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
+    defaultValues: {
+      hasBit: false,
+      hasPaybox: false,
+      hasBankTransfer: false,
+      hasCreditCard: false,
+    }
   });
+
+  const hasBit = watch('hasBit');
+  const hasPaybox = watch('hasPaybox');
+  const hasBankTransfer = watch('hasBankTransfer');
+  const hasCreditCard = watch('hasCreditCard');
 
   const onSubmit = async (data: RegisterFormData) => {
     setIsSubmitting(true);
     try {
+      // Build payment methods object
+      const paymentMethods: any = {};
+      if (data.hasBit && data.bitPhone) paymentMethods.bit = data.bitPhone;
+      if (data.hasPaybox && data.payboxLink) paymentMethods.paybox = data.payboxLink;
+      if (data.hasCreditCard && data.creditCardLink) paymentMethods.creditCard = data.creditCardLink;
+      if (data.hasBankTransfer && data.bankName && data.bankBranch && data.bankAccount && data.bankAccountName) {
+        paymentMethods.bankTransfer = {
+          bankName: data.bankName,
+          branch: data.bankBranch,
+          account: data.bankAccount,
+          accountName: data.bankAccountName
+        };
+      }
+
       // Create user in Firebase via useAuth hook
       await registerAuth(data.email, data.password, data.name, false, {
         phone: data.phone,
         city: data.pickupCity,
         street: data.pickupStreet,
         zip: data.pickupZip
-      });
+      }, paymentMethods);
       setSuccess(true);
       setTimeout(() => {
         router.push('/dashboard');
@@ -227,6 +264,84 @@ export default function AuthorRegisterPage() {
                       placeholder="הרקפת 12, דירה 4"
                     />
                     {errors.pickupStreet && <p className="mt-1 text-sm text-red-600">{errors.pickupStreet.message}</p>}
+                  </div>
+                </div>
+              </div>
+
+              {/* Payment Methods */}
+              <div className="pt-2 border-t border-gray-100">
+                <h3 className="text-md font-bold text-gray-900 mb-4">איך תרצה לקבל תשלום מהקוראים?</h3>
+                <p className="text-sm text-gray-500 mb-4">סמן את כל האפשרויות שאתה מקבל, הלקוח יוכל לבחור מתוכן.</p>
+                
+                <div className="space-y-4">
+                  {/* Bit */}
+                  <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                    <label className="flex items-center gap-3 cursor-pointer mb-2">
+                      <input type="checkbox" {...register('hasBit')} className="w-5 h-5 text-green-600 rounded" />
+                      <span className="font-bold text-gray-800">אפליקציית Bit</span>
+                    </label>
+                    {hasBit && (
+                      <div className="mt-3 pl-8">
+                        <label className="block text-sm text-gray-600 mb-1">מספר טלפון להעברה בביט</label>
+                        <input type="tel" {...register('bitPhone')} className="w-full bg-white border border-gray-300 rounded-lg py-2 px-3" placeholder="050-0000000" dir="ltr" />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Paybox */}
+                  <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                    <label className="flex items-center gap-3 cursor-pointer mb-2">
+                      <input type="checkbox" {...register('hasPaybox')} className="w-5 h-5 text-green-600 rounded" />
+                      <span className="font-bold text-gray-800">אפליקציית Paybox</span>
+                    </label>
+                    {hasPaybox && (
+                      <div className="mt-3 pl-8">
+                        <label className="block text-sm text-gray-600 mb-1">קישור אישי (קופה / אישי)</label>
+                        <input type="url" {...register('payboxLink')} className="w-full bg-white border border-gray-300 rounded-lg py-2 px-3" placeholder="https://payboxapp.page.link/..." dir="ltr" />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Bank Transfer */}
+                  <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                    <label className="flex items-center gap-3 cursor-pointer mb-2">
+                      <input type="checkbox" {...register('hasBankTransfer')} className="w-5 h-5 text-green-600 rounded" />
+                      <span className="font-bold text-gray-800">העברה בנקאית</span>
+                    </label>
+                    {hasBankTransfer && (
+                      <div className="mt-3 pl-8 grid grid-cols-2 gap-3">
+                        <div className="col-span-2 md:col-span-1">
+                          <label className="block text-xs text-gray-600 mb-1">שם הבנק</label>
+                          <input type="text" {...register('bankName')} className="w-full bg-white border border-gray-300 rounded-lg py-2 px-3" placeholder="פועלים / לאומי" />
+                        </div>
+                        <div className="col-span-2 md:col-span-1">
+                          <label className="block text-xs text-gray-600 mb-1">מספר סניף</label>
+                          <input type="text" {...register('bankBranch')} className="w-full bg-white border border-gray-300 rounded-lg py-2 px-3" placeholder="123" />
+                        </div>
+                        <div className="col-span-2 md:col-span-1">
+                          <label className="block text-xs text-gray-600 mb-1">מספר חשבון</label>
+                          <input type="text" {...register('bankAccount')} className="w-full bg-white border border-gray-300 rounded-lg py-2 px-3" placeholder="123456" />
+                        </div>
+                        <div className="col-span-2 md:col-span-1">
+                          <label className="block text-xs text-gray-600 mb-1">שם בעל החשבון</label>
+                          <input type="text" {...register('bankAccountName')} className="w-full bg-white border border-gray-300 rounded-lg py-2 px-3" placeholder="ישראל ישראלי" />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Credit Card */}
+                  <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                    <label className="flex items-center gap-3 cursor-pointer mb-2">
+                      <input type="checkbox" {...register('hasCreditCard')} className="w-5 h-5 text-green-600 rounded" />
+                      <span className="font-bold text-gray-800">סליקה באשראי (PayPlus / משולם וכו')</span>
+                    </label>
+                    {hasCreditCard && (
+                      <div className="mt-3 pl-8">
+                        <label className="block text-sm text-gray-600 mb-1">קישור לדף תשלום</label>
+                        <input type="url" {...register('creditCardLink')} className="w-full bg-white border border-gray-300 rounded-lg py-2 px-3" placeholder="https://..." dir="ltr" />
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

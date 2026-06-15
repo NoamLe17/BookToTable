@@ -46,7 +46,8 @@ export function useAuth() {
     password: string,
     name: string,
     allowsFanMail: boolean = false,
-    pickupAddress?: { street: string; city: string; zip: string; phone: string; }
+    pickupAddress?: { street: string; city: string; zip: string; phone: string; },
+    paymentMethods?: any
   ) => {
     try {
       const cred = await createUserWithEmailAndPassword(auth, email, password);
@@ -56,7 +57,8 @@ export function useAuth() {
         email,
         allowsFanMail,
         stripeOnboarded: false,
-        ...(pickupAddress && { pickupAddress })
+        ...(pickupAddress && { pickupAddress }),
+        ...(paymentMethods && { paymentMethods })
       });
       const userData = await getUserById(cred.user.uid);
       setUser(userData);

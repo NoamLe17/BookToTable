@@ -23,7 +23,20 @@ function ProfileContent() {
   // Settings State
   const [bio, setBio] = useState(user?.bio || '');
   const [age, setAge] = useState(user?.age || '');
-  const [paymentLink, setPaymentLink] = useState(user?.paymentLink || '');
+  
+  // Payment Methods State
+  const [hasBit, setHasBit] = useState(!!user?.paymentMethods?.bit);
+  const [bitPhone, setBitPhone] = useState(user?.paymentMethods?.bit || '');
+  const [hasPaybox, setHasPaybox] = useState(!!user?.paymentMethods?.paybox);
+  const [payboxLink, setPayboxLink] = useState(user?.paymentMethods?.paybox || '');
+  const [hasCreditCard, setHasCreditCard] = useState(!!user?.paymentMethods?.creditCard);
+  const [creditCardLink, setCreditCardLink] = useState(user?.paymentMethods?.creditCard || '');
+  const [hasBankTransfer, setHasBankTransfer] = useState(!!user?.paymentMethods?.bankTransfer);
+  const [bankName, setBankName] = useState(user?.paymentMethods?.bankTransfer?.bankName || '');
+  const [bankBranch, setBankBranch] = useState(user?.paymentMethods?.bankTransfer?.branch || '');
+  const [bankAccount, setBankAccount] = useState(user?.paymentMethods?.bankTransfer?.account || '');
+  const [bankAccountName, setBankAccountName] = useState(user?.paymentMethods?.bankTransfer?.accountName || '');
+
   const [phone, setPhone] = useState(user?.pickupAddress?.phone || '');
   const [pickupCity, setPickupCity] = useState(user?.pickupAddress?.city || '');
   const [pickupStreet, setPickupStreet] = useState(user?.pickupAddress?.street || '');
@@ -40,7 +53,17 @@ function ProfileContent() {
         if (u) {
           setBio(u.bio || '');
           setAge(u.age || '');
-          setPaymentLink(u.paymentLink || '');
+          setHasBit(!!u.paymentMethods?.bit);
+          setBitPhone(u.paymentMethods?.bit || '');
+          setHasPaybox(!!u.paymentMethods?.paybox);
+          setPayboxLink(u.paymentMethods?.paybox || '');
+          setHasCreditCard(!!u.paymentMethods?.creditCard);
+          setCreditCardLink(u.paymentMethods?.creditCard || '');
+          setHasBankTransfer(!!u.paymentMethods?.bankTransfer);
+          setBankName(u.paymentMethods?.bankTransfer?.bankName || '');
+          setBankBranch(u.paymentMethods?.bankTransfer?.branch || '');
+          setBankAccount(u.paymentMethods?.bankTransfer?.account || '');
+          setBankAccountName(u.paymentMethods?.bankTransfer?.accountName || '');
           setPhone(u.pickupAddress?.phone || '');
           setPickupCity(u.pickupAddress?.city || '');
           setPickupStreet(u.pickupAddress?.street || '');
@@ -51,7 +74,17 @@ function ProfileContent() {
         if (user) {
           setBio(user.bio || '');
           setAge(user.age || '');
-          setPaymentLink(user.paymentLink || '');
+          setHasBit(!!user.paymentMethods?.bit);
+          setBitPhone(user.paymentMethods?.bit || '');
+          setHasPaybox(!!user.paymentMethods?.paybox);
+          setPayboxLink(user.paymentMethods?.paybox || '');
+          setHasCreditCard(!!user.paymentMethods?.creditCard);
+          setCreditCardLink(user.paymentMethods?.creditCard || '');
+          setHasBankTransfer(!!user.paymentMethods?.bankTransfer);
+          setBankName(user.paymentMethods?.bankTransfer?.bankName || '');
+          setBankBranch(user.paymentMethods?.bankTransfer?.branch || '');
+          setBankAccount(user.paymentMethods?.bankTransfer?.account || '');
+          setBankAccountName(user.paymentMethods?.bankTransfer?.accountName || '');
           setPhone(user.pickupAddress?.phone || '');
           setPickupCity(user.pickupAddress?.city || '');
           setPickupStreet(user.pickupAddress?.street || '');
@@ -76,10 +109,23 @@ function ProfileContent() {
         avatarUrl = await getDownloadURL(storageRef);
       }
 
+      const paymentMethods: any = {};
+      if (hasBit && bitPhone) paymentMethods.bit = bitPhone;
+      if (hasPaybox && payboxLink) paymentMethods.paybox = payboxLink;
+      if (hasCreditCard && creditCardLink) paymentMethods.creditCard = creditCardLink;
+      if (hasBankTransfer && bankName && bankBranch && bankAccount && bankAccountName) {
+        paymentMethods.bankTransfer = {
+          bankName,
+          branch: bankBranch,
+          account: bankAccount,
+          accountName
+        };
+      }
+
       await updateDoc(doc(db, 'users', targetUid), {
         bio,
         age,
-        paymentLink,
+        paymentMethods,
         pickupAddress: {
           phone,
           city: pickupCity,
@@ -146,9 +192,10 @@ function ProfileContent() {
                   placeholder="למשל: 34"
                 />
               </div>
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <label className="block text-sm font-bold text-gray-700">קישור לתשלום (Paybox / אשראי / Bit) *</label>
+              {/* Payment Methods */}
+              <div className="pt-4 border-t border-gray-100">
+                <div className="flex items-center gap-2 mb-4">
+                  <h3 className="text-md font-bold text-gray-900">אמצעי תשלום נתמכים</h3>
                   <button 
                     type="button" 
                     onClick={() => setIsHelpModalOpen(true)}
@@ -157,16 +204,79 @@ function ProfileContent() {
                     <HelpCircle size={16} />
                   </button>
                 </div>
-                <input 
-                  type="url" 
-                  value={paymentLink}
-                  onChange={(e) => setPaymentLink(e.target.value)}
-                  required
-                  className="w-full bg-gray-50 border border-gray-200 rounded-lg py-2.5 px-4 focus:outline-none focus:ring-2 focus:ring-green-500"
-                  placeholder="https://payboxapp.page.link/..."
-                  dir="ltr"
-                />
-                <p className="text-xs text-gray-500 mt-1">חובה! לשם יועברו התשלומים מהרוכשים.</p>
+                <p className="text-sm text-gray-500 mb-4">סמן אילו אמצעי תשלום תרצה להציג לרוכשים שלך כדי שיעבירו לך את הכסף.</p>
+                
+                <div className="space-y-4">
+                  {/* Bit */}
+                  <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                    <label className="flex items-center gap-3 cursor-pointer mb-2">
+                      <input type="checkbox" checked={hasBit} onChange={(e) => setHasBit(e.target.checked)} className="w-5 h-5 text-green-600 rounded" />
+                      <span className="font-bold text-gray-800">אפליקציית Bit</span>
+                    </label>
+                    {hasBit && (
+                      <div className="mt-3 pl-8">
+                        <label className="block text-sm text-gray-600 mb-1">מספר טלפון להעברה</label>
+                        <input type="tel" value={bitPhone} onChange={(e) => setBitPhone(e.target.value)} className="w-full bg-white border border-gray-300 rounded-lg py-2 px-3" placeholder="050-0000000" dir="ltr" />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Paybox */}
+                  <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                    <label className="flex items-center gap-3 cursor-pointer mb-2">
+                      <input type="checkbox" checked={hasPaybox} onChange={(e) => setHasPaybox(e.target.checked)} className="w-5 h-5 text-green-600 rounded" />
+                      <span className="font-bold text-gray-800">אפליקציית Paybox</span>
+                    </label>
+                    {hasPaybox && (
+                      <div className="mt-3 pl-8">
+                        <label className="block text-sm text-gray-600 mb-1">קישור אישי (קופה / אישי)</label>
+                        <input type="url" value={payboxLink} onChange={(e) => setPayboxLink(e.target.value)} className="w-full bg-white border border-gray-300 rounded-lg py-2 px-3" placeholder="https://payboxapp.page.link/..." dir="ltr" />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Bank Transfer */}
+                  <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                    <label className="flex items-center gap-3 cursor-pointer mb-2">
+                      <input type="checkbox" checked={hasBankTransfer} onChange={(e) => setHasBankTransfer(e.target.checked)} className="w-5 h-5 text-green-600 rounded" />
+                      <span className="font-bold text-gray-800">העברה בנקאית</span>
+                    </label>
+                    {hasBankTransfer && (
+                      <div className="mt-3 pl-8 grid grid-cols-2 gap-3">
+                        <div className="col-span-2 md:col-span-1">
+                          <label className="block text-xs text-gray-600 mb-1">שם הבנק</label>
+                          <input type="text" value={bankName} onChange={(e) => setBankName(e.target.value)} className="w-full bg-white border border-gray-300 rounded-lg py-2 px-3" placeholder="פועלים / לאומי" />
+                        </div>
+                        <div className="col-span-2 md:col-span-1">
+                          <label className="block text-xs text-gray-600 mb-1">מספר סניף</label>
+                          <input type="text" value={bankBranch} onChange={(e) => setBankBranch(e.target.value)} className="w-full bg-white border border-gray-300 rounded-lg py-2 px-3" placeholder="123" />
+                        </div>
+                        <div className="col-span-2 md:col-span-1">
+                          <label className="block text-xs text-gray-600 mb-1">מספר חשבון</label>
+                          <input type="text" value={bankAccount} onChange={(e) => setBankAccount(e.target.value)} className="w-full bg-white border border-gray-300 rounded-lg py-2 px-3" placeholder="123456" />
+                        </div>
+                        <div className="col-span-2 md:col-span-1">
+                          <label className="block text-xs text-gray-600 mb-1">שם בעל החשבון</label>
+                          <input type="text" value={bankAccountName} onChange={(e) => setBankAccountName(e.target.value)} className="w-full bg-white border border-gray-300 rounded-lg py-2 px-3" placeholder="ישראל ישראלי" />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Credit Card */}
+                  <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                    <label className="flex items-center gap-3 cursor-pointer mb-2">
+                      <input type="checkbox" checked={hasCreditCard} onChange={(e) => setHasCreditCard(e.target.checked)} className="w-5 h-5 text-green-600 rounded" />
+                      <span className="font-bold text-gray-800">סליקה באשראי (PayPlus / משולם וכו')</span>
+                    </label>
+                    {hasCreditCard && (
+                      <div className="mt-3 pl-8">
+                        <label className="block text-sm text-gray-600 mb-1">קישור לדף תשלום</label>
+                        <input type="url" value={creditCardLink} onChange={(e) => setCreditCardLink(e.target.value)} className="w-full bg-white border border-gray-300 rounded-lg py-2 px-3" placeholder="https://..." dir="ltr" />
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
               
               <div>

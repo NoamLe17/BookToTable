@@ -10,7 +10,18 @@ export interface User {
   stripeAccountId?: string;
   stripeOnboarded: boolean;
   allowsFanMail: boolean;
-  paymentLink?: string;
+  paymentLink?: string; // Legacy
+  paymentMethods?: {
+    bit?: string;
+    paybox?: string;
+    creditCard?: string;
+    bankTransfer?: {
+      bankName: string;
+      branch: string;
+      account: string;
+      accountName: string;
+    };
+  };
   pickupAddress?: {
     street: string;
     city: string;

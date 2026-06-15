@@ -13,7 +13,12 @@ function CheckoutSuccessContent() {
   const searchParams = useSearchParams();
   const orderIds = searchParams.get('orders')?.split(',') || [];
   
-  const [authorPayments, setAuthorPayments] = useState<{ authorName: string; amount: number; paymentLink: string }[]>([]);
+  const [authorPayments, setAuthorPayments] = useState<{ 
+    authorName: string; 
+    amount: number; 
+    paymentLink: string;
+    paymentMethods?: any;
+  }[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -75,6 +80,7 @@ function CheckoutSuccessContent() {
               authorName: authorData.name,
               amount: data.amount,
               paymentLink: authorData.paymentLink || '',
+              paymentMethods: authorData.paymentMethods,
             });
           }
         }
@@ -114,13 +120,63 @@ function CheckoutSuccessContent() {
             <p className="text-sm text-gray-500 font-medium">מייצר קישורי תשלום...</p>
           </div>
         ) : (
-          <div className="space-y-4 mb-8">
+          <div className="space-y-6 mb-8 text-right">
             {authorPayments.map((payment, idx) => (
-              <div key={idx} className="bg-gray-50 border border-gray-200 p-4 rounded-xl text-right">
-                <p className="text-sm text-gray-600 font-bold mb-3">
-                  לתשלום עבור הספרים של <span className="text-gray-900">{payment.authorName}</span>:
+              <div key={idx} className="bg-white border-2 border-gray-100 p-5 rounded-2xl shadow-sm relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-2 h-full bg-green-500"></div>
+                <h3 className="text-lg font-black text-gray-900 mb-1">
+                  תשלום לסופר/ת: {payment.authorName}
+                </h3>
+                <p className="text-gray-600 font-medium mb-4">
+                  סכום להעברה: <span className="text-green-700 font-bold">₪{payment.amount.toFixed(2)}</span>
                 </p>
-                {payment.paymentLink ? (
+
+                {payment.paymentMethods && Object.keys(payment.paymentMethods).length > 0 ? (
+                  <div className="space-y-3">
+                    <p className="text-sm text-gray-500 font-bold mb-2">איך תרצה לשלם?</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      
+                      {/* Bit */}
+                      {payment.paymentMethods.bit && (
+                        <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 flex flex-col justify-center items-center text-center hover:border-green-300 transition-colors">
+                          <img src="https://www.bitpay.co.il/assets/images/bit-logo.svg" alt="Bit" className="h-8 mb-2 opacity-80" />
+                          <span className="text-sm font-bold text-gray-800 block mb-1">העברה בביט למספר:</span>
+                          <span className="text-lg font-black text-blue-600 tracking-wider" dir="ltr">{payment.paymentMethods.bit}</span>
+                        </div>
+                      )}
+
+                      {/* Paybox */}
+                      {payment.paymentMethods.paybox && (
+                        <a href={payment.paymentMethods.paybox} target="_blank" rel="noopener noreferrer" className="bg-blue-50 border border-blue-100 hover:border-blue-300 rounded-xl p-4 flex flex-col justify-center items-center text-center transition-colors group">
+                          <span className="text-blue-600 font-black text-xl mb-1 group-hover:scale-105 transition-transform">Paybox</span>
+                          <span className="text-sm font-bold text-blue-800">לחץ למעבר לקופה</span>
+                        </a>
+                      )}
+
+                      {/* Credit Card */}
+                      {payment.paymentMethods.creditCard && (
+                        <a href={payment.paymentMethods.creditCard} target="_blank" rel="noopener noreferrer" className="bg-green-50 border border-green-100 hover:border-green-300 rounded-xl p-4 flex flex-col justify-center items-center text-center transition-colors group">
+                          <CreditCard size={28} className="text-green-600 mb-1 group-hover:scale-105 transition-transform" />
+                          <span className="text-sm font-bold text-green-800">תשלום מאובטח באשראי</span>
+                        </a>
+                      )}
+
+                      {/* Bank Transfer */}
+                      {payment.paymentMethods.bankTransfer && (
+                        <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 flex flex-col sm:col-span-2 hover:border-green-300 transition-colors">
+                          <span className="text-sm font-bold text-gray-800 block mb-2 border-b pb-1">פרטי העברה בנקאית:</span>
+                          <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-gray-600">
+                            <div><span className="font-bold">בנק:</span> {payment.paymentMethods.bankTransfer.bankName}</div>
+                            <div><span className="font-bold">סניף:</span> {payment.paymentMethods.bankTransfer.branch}</div>
+                            <div><span className="font-bold">חשבון:</span> {payment.paymentMethods.bankTransfer.account}</div>
+                            <div><span className="font-bold">שם המוטב:</span> {payment.paymentMethods.bankTransfer.accountName}</div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : payment.paymentLink ? (
+                  // Legacy fallback
                   <a 
                     href={payment.paymentLink}
                     target="_blank"
@@ -131,8 +187,8 @@ function CheckoutSuccessContent() {
                     מעבר לעמוד התשלום של הסופר (אשראי / אפליקציות)
                   </a>
                 ) : (
-                  <p className="text-sm text-red-600 font-medium bg-red-50 p-2 rounded">
-                    לסופר זה טרם הוגדר קישור תשלום. אנא צור איתו קשר להעברת הכסף.
+                  <p className="text-sm text-red-600 font-medium bg-red-50 p-3 rounded-lg border border-red-100">
+                    לסופר זה טרם הוגדרו אמצעי תשלום. אנא צור איתו קשר להעברת הכסף.
                   </p>
                 )}
               </div>
