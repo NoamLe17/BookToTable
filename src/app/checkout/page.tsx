@@ -44,7 +44,7 @@ export default function CheckoutPage() {
       byAuthor[item.book.authorId].push(item);
     });
 
-    const SHIPPING_FEE_PER_AUTHOR = 20;
+    const SHIPPING_FEE_PER_AUTHOR = 0;
     const uniqueAuthorsCount = Object.keys(byAuthor).length;
     const totalShipping = uniqueAuthorsCount * SHIPPING_FEE_PER_AUTHOR;
 
@@ -232,7 +232,7 @@ export default function CheckoutPage() {
                   <span>₪{shippingFee.toFixed(2)}</span>
                 </div>
                 <p className="text-xs text-gray-400 mt-1">
-                  המשלוחים יוצאים ישירות מבתי הסופרים, ולכן משלמים דמי משלוח לכל סופר בנפרד.
+                  המשלוח חינם (מגולם במחיר הספר). כל ההכנסות מועברות ישירות אל הסופר.
                 </p>
               </div>
               

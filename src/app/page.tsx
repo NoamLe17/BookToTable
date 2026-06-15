@@ -109,7 +109,7 @@ export default async function HomePage() {
                 <Star size={32} />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">2. משלמים באבטחה</h3>
-              <p className="text-gray-500 font-medium">מערכת התשלומים שלנו דואגת שהכסף (90%) יעבור ישירות לסופר באופן מיידי.</p>
+              <p className="text-gray-500 font-medium">מערכת התשלומים שלנו דואגת שהכסף (100%) יעבור ישירות לסופר באופן מיידי.</p>
             </div>
             <div className="p-8 rounded-3xl bg-gray-50 border border-gray-100 hover:shadow-md transition-shadow">
               <div className="w-16 h-16 bg-green-100 text-green-600 rounded-2xl flex items-center justify-center mx-auto mb-6">

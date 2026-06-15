@@ -84,7 +84,7 @@ export default function AuthorRegisterPage() {
           <ul className="space-y-4 text-right text-lg text-green-50">
             <li className="flex items-center gap-3">
               <CheckCircle2 className="text-green-400 flex-shrink-0" />
-              <span>90% מהרווח נשאר אצלך, תמיד.</span>
+              <span>100% מהרווח נשאר אצלך, תמיד.</span>
             </li>
             <li className="flex items-center gap-3">
               <CheckCircle2 className="text-green-400 flex-shrink-0" />

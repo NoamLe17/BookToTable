@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   keywords: 'ספרים, סופרים, ספרים עצמאיים, BookToTable, מכירת ספרים, ישראל',
   openGraph: {
     title: 'BookToTable | פלטפורמת הסופרים העצמאיים',
-    description: 'מכור את ספרך ישירות לקוראים – 90% מהרווח נשאר אצלך.',
+    description: 'מכור את ספרך ישירות לקוראים – 100% מהרווח נשאר אצלך.',
     locale: 'he_IL',
     type: 'website',
   },

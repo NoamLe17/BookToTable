@@ -22,8 +22,8 @@ export function getShippingRate(company: ShippingCompany): ShippingRate {
 }
 
 export function calculateSplits(bookPrice: number, shippingFee: number) {
-  const platformFee = Math.round(bookPrice * 0.1 * 100) / 100;
-  const authorAmount = Math.round((bookPrice - platformFee) * 100) / 100;
+  const platformFee = 0;
+  const authorAmount = bookPrice;
   return {
     splitAuthor: authorAmount,
     splitPlatform: platformFee,

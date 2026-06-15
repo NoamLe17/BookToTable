@@ -21,7 +21,7 @@ export async function POST(request: Request) {
         authorTotalAmount += (item.book.price * item.quantity);
 
         // Calculate shipping for this specific item (shared across author's items)
-        const itemShippingFee = 20 / itemsList.length;
+        const itemShippingFee = 0;
 
         // Create order in Firestore
         const orderId = await createOrder({
@@ -32,9 +32,9 @@ export async function POST(request: Request) {
           readerDetails: readerDetails,
           shippingCompany: 'cheetah', // Default MVP
           shippingFee: itemShippingFee,
-          totalPaid: (item.book.price * item.quantity) + itemShippingFee,
-          splitAuthor: (item.book.price * item.quantity) * 0.9,
-          splitPlatform: (item.book.price * item.quantity) * 0.1,
+          totalPaid: (item.book.price * item.quantity),
+          splitAuthor: (item.book.price * item.quantity),
+          splitPlatform: 0,
           splitShipping: itemShippingFee,
           status: 'pending_payment',
           trackingNumber: '',

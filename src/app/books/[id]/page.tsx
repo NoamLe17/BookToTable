@@ -150,7 +150,7 @@ export default async function BookPage({ params }: BookPageProps) {
             </div>
             <div>
               <p className="text-sm text-gray-500 mb-1 font-medium">הכנסה לסופר</p>
-              <p className="font-bold text-gray-900">90% מהמכירה!</p>
+              <p className="font-bold text-gray-900">100% מהמכירה!</p>
             </div>
           </div>
         </div>
