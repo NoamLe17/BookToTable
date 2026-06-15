@@ -118,7 +118,7 @@ function ProfileContent() {
           bankName,
           branch: bankBranch,
           account: bankAccount,
-          accountName
+          accountName: bankAccountName
         };
       }
 
