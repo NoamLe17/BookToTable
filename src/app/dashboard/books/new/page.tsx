@@ -15,7 +15,6 @@ const bookSchema = z.object({
   title: z.string().min(2, 'כותרת הספר חייבת להכיל לפחות 2 תווים'),
   description: z.string().min(10, 'תיאור הספר חייב להכיל לפחות 10 תווים'),
   price: z.number().min(1, 'מחיר חייב להיות לפחות 1 ש"ח'),
-  weightGrams: z.number().min(50, 'משקל הספר בגרמים חסר או נמוך מדי'),
   genre: z.string().optional(),
 });
 
@@ -69,7 +68,6 @@ export default function AddBookPage() {
         title: data.title,
         description: data.description,
         price: data.price,
-        weightGrams: data.weightGrams,
         genre: data.genre || '',
         coverUrl: coverUrl,
         isPublished: true, // Auto publish for now
@@ -140,7 +138,7 @@ export default function AddBookPage() {
                 {errors.description && <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>}
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-1">מחיר (₪) *</label>
                   <input
@@ -151,17 +149,6 @@ export default function AddBookPage() {
                     placeholder="79"
                   />
                   {errors.price && <p className="mt-1 text-sm text-red-600">{errors.price.message}</p>}
-                </div>
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-1">משקל (גרם) *</label>
-                  <input
-                    {...register('weightGrams', { valueAsNumber: true })}
-                    type="number"
-                    min="50"
-                    className="w-full bg-gray-50 border border-gray-200 rounded-lg py-2.5 px-4 focus:outline-none focus:ring-2 focus:ring-green-500 focus:bg-white transition-all"
-                    placeholder="350"
-                  />
-                  {errors.weightGrams && <p className="mt-1 text-sm text-red-600">{errors.weightGrams.message}</p>}
                 </div>
               </div>
 

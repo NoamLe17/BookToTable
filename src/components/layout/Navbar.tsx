@@ -2,10 +2,11 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { useCart } from '@/contexts/CartContext';
-import { BookOpen, User, LogOut, Menu, X, LayoutDashboard, ShoppingCart } from 'lucide-react';
+import { User, LogOut, Menu, X, LayoutDashboard, ShoppingCart } from 'lucide-react';
 
 export default function Navbar() {
   const { user, firebaseUser, isAuthenticated, logout } = useAuth();
@@ -21,11 +22,18 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-20">
           
           {/* Logo (Right) */}
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-green-600 rounded-xl flex items-center justify-center text-white shadow-md">
-              <BookOpen size={24} />
+          <Link href="/" className="flex items-center gap-2.5">
+            <Image
+              src="/logo-icon.png"
+              alt="Book To Table"
+              width={40}
+              height={40}
+              className="rounded-xl shadow-sm"
+            />
+            <div>
+              <span className="font-black text-xl text-gray-900 tracking-tight leading-none block">BookToTable</span>
+              <span className="text-[10px] text-green-600 font-semibold leading-none block mt-0.5">מהסופר לשולחן הקריאה</span>
             </div>
-            <span className="font-black text-2xl text-gray-900 tracking-tight">BookToTable</span>
           </Link>
 
           {/* Desktop Nav (Center) */}

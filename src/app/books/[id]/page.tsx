@@ -145,10 +145,6 @@ export default async function BookPage({ params }: BookPageProps) {
               </p>
             </div>
             <div>
-              <p className="text-sm text-gray-500 mb-1 font-medium">משקל</p>
-              <p className="font-bold text-gray-900">{book.weightGrams} גרם</p>
-            </div>
-            <div>
               <p className="text-sm text-gray-500 mb-1 font-medium">הכנסה לסופר</p>
               <p className="font-bold text-gray-900">100% מהמכירה!</p>
             </div>

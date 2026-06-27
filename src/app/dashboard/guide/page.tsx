@@ -278,8 +278,9 @@ export default function AuthorGuidePage() {
           defaultOpen={true}
         >
           <p>
-            כאשר קורא מזמין ספר, הוא מועבר לשלם <strong>ישירות אליך</strong> — לא דרך הפלטפורמה.
-            לכן חובה להגדיר לפחות אמצעי תשלום אחד כדי שיהיה לקוראים לאן לשלוח את הכסף.
+            כעת בשלב ההרצה, כאשר קורא מזמין ספר הוא מועבר לשלם <strong>ישירות אליך</strong> — ולא דרך הפלטפורמה.
+            שימוש בקופת Paybox ואמצעי תשלום חלופיים הוא פתרון זמני עד שתהיה סליקה אוטומטית מלאה באתר.
+            לכן, חובה להגדיר לפחות אמצעי תשלום אחד על מנת שיהיה לקוראים לאן להעביר את התשלום.
           </p>
 
           <div className="space-y-3">
@@ -329,7 +330,7 @@ export default function AuthorGuidePage() {
 
           <div className="space-y-3">
             <CardRow icon={Truck} iconBg="bg-green-100 text-green-600" title="משלוח עד הבית">
-              הקורא מזין כתובת בית ואתה שולח. <strong>עלות לקורא: חינם עד 40 ק&quot;מ</strong>, תוספת של 15₪ מעל. בסעיף הבא (שילוח) נסביר איך בדיוק לשלוח.
+              הקורא מזין כתובת בית ואתה שולח אליו. <strong>הסופר קובע את עלות המשלוח</strong> כחלק מהמחיר הסופי שהקורא ישלם בקופה. בסעיף השילוח מטה נסביר איך בדיוק לשלוח.
             </CardRow>
 
             <CardRow icon={MapPin} iconBg="bg-blue-100 text-blue-600" title="נקודת חלוקה / לוקר">
@@ -381,9 +382,8 @@ export default function AuthorGuidePage() {
           </p>
           <ul className="space-y-2">
             <CheckRow><strong>כותרת הספר</strong> — כפי שיופיע לקוראים</CheckRow>
-            <CheckRow><strong>תיאור / תקציר</strong> — מה הספר עוסק בו, מה מייחד אותו. ככל שהתיאור עשיר יותר — כך ייטב.</CheckRow>
+            <CheckRow><strong>תיאור / תקציר</strong> — מה הספר עוסק בו ומה מייחד אותו. ככל שהתיאור עשיר יותר, כך ייטב.</CheckRow>
             <CheckRow><strong>מחיר (₪)</strong> — אתה קובע לגמרי. אין מגבלה מלמעלה.</CheckRow>
-            <CheckRow><strong>משקל (גרמים)</strong> — משמש לחישוב עלות משלוח מדויקת.</CheckRow>
             <CheckRow><strong>ז׳אנר</strong> — מאפשר לקוראים לסנן לפי קטגוריה.</CheckRow>
             <CheckRow><strong>תמונת כריכה</strong> — <strong>חובה!</strong> כריכה איכותית היא אחד הגורמים הכי משפיעים על מכירות.</CheckRow>
           </ul>
@@ -506,21 +506,18 @@ export default function AuthorGuidePage() {
           title="מה האתר מרוויח מזה?"
           defaultOpen={true}
         >
-          <p>
-            שאלה מצוינת — ואנחנו מאמינים בשקיפות מלאה:
-          </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="bg-green-50 border border-green-100 rounded-xl p-4">
-              <p className="font-bold text-green-800 mb-1">כרגע — לא גובים כלום</p>
-              <p className="text-sm text-green-700">זו תקופת השקה. אנחנו בונים את הקהילה, רוצים שסופרים יצטרפו ויגדלו, ולא גובים שום עמלה.</p>
+              <p className="font-bold text-green-800 mb-1">כרגע — חינם לחלוטין</p>
+              <p className="text-sm text-green-700">כעת הפלטפורמה חינמית לחלוטין. אנחנו בונים את הקהילה ורוצים שסופרים יצטרפו ולכן לא גובים עמלה.</p>
             </div>
             <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
-              <p className="font-bold text-blue-800 mb-1">בעתיד — עמלה קטנה ושקופה</p>
-              <p className="text-sm text-blue-700">ייתכן שנציג עמלה קטנה (%) על כל עסקה לצורך תחזוקת השרתים, פיתוח ושיווק. כל שינוי יפורסם מראש.</p>
+              <p className="font-bold text-blue-800 mb-1">בעתיד — תהיה עמלה</p>
+              <p className="text-sm text-blue-700">בעתיד תיגבה עמלה על כל עסקה על מנת לתחזק שרתים, לפתח ולשווק את האתר. כל שינוי כמובן יפורסם מראש.</p>
             </div>
           </div>
           <Callout variant="blue">
-            <strong>ההבטחה שלנו:</strong> לא נשנה מודל תשלום בלי להודיע לסופרים לפחות 30 יום מראש. אתם שותפים, לא לקוחות.
+            <strong>ההבטחה שלנו:</strong> לא נשנה את מודל התשלום מבלי להודיע לפחות 30 יום מראש.
           </Callout>
         </AccordionItem>
 

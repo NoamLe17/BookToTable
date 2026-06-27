@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { BookOpen, Mail, Leaf, X } from 'lucide-react';
+import Image from 'next/image';
+import { Mail, X } from 'lucide-react';
 
 export default function Footer() {
   const [isFaqOpen, setIsFaqOpen] = useState(false);
@@ -14,15 +15,22 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
           {/* Brand */}
           <div className="md:col-span-2">
-            <Link href="/" className="flex items-center gap-2 mb-4 group">
-              <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-sm">
-                <BookOpen className="w-5 h-5 text-white" />
+            <Link href="/" className="flex items-center gap-3 mb-4 group">
+              <Image
+                src="/logo-icon.png"
+                alt="Book To Table"
+                width={40}
+                height={40}
+                className="rounded-xl shadow-sm"
+              />
+              <div>
+                <span className="font-black text-xl text-gray-900 block leading-none">BookToTable</span>
+                <span className="text-xs text-green-600 font-semibold block mt-0.5">מהסופר לשולחן הקריאה</span>
               </div>
-              <span className="font-black text-2xl gradient-text">BookToTable</span>
             </Link>
             <p className="text-gray-600 text-sm leading-relaxed max-w-sm">
-              פלטפורמה דיגיטלית המעצימה סופרים עצמאיים למכור ספרים ישירות לקוראים. 
-              מודל הוגן ושקוף – פרט לעלויות שילוח וסליקה, כל הכסף מהמכירה הולך ישירות אליכם.
+              פלטפורמה דיגיטלית המעצימה סופרים עצמאיים למכור ספרים ישירות לקוראים —
+              ללא מתווכים, ללא עמלות בשלב ההשקה, עם מינימום בירוקרטיה.
             </p>
             <div className="flex items-center gap-3 mt-6">
               <a href="#" className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-green-500 hover:text-white transition-all">

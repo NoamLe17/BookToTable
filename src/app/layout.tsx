@@ -15,15 +15,16 @@ const heebo = Heebo({
 });
 
 export const metadata: Metadata = {
-  title: 'BookToTable | פלטפורמת הסופרים העצמאיים',
+  title: 'Book To Table | מהסופר לשולחן הקריאה',
   description:
-    'BookToTable – הפלטפורמה הראשונה בישראל שמאפשרת לסופרים עצמאיים למכור ספרים ישירות לקוראים, עם תשלום הוגן ומשלוח מהיר.',
-  keywords: 'ספרים, סופרים, ספרים עצמאיים, BookToTable, מכירת ספרים, ישראל',
+    'Book To Table – הפלטפורמה הראשונה בישראל שמאפשרת לסופרים עצמאיים למכור ספרים ישירות לקוראים. ללא עמלות, ללא מתווכים — מהסופר לשולחן הקריאה.',
+  keywords: 'ספרים, סופרים עצמאיים, Book To Table, BookToTable, מהסופר לשולחן הקריאה, מכירת ספרים, ישראל, ספרים ישראלים',
   openGraph: {
-    title: 'BookToTable | פלטפורמת הסופרים העצמאיים',
-    description: 'מכור את ספרך ישירות לקוראים – 100% מהרווח נשאר אצלך.',
+    title: 'Book To Table | מהסופר לשולחן הקריאה',
+    description: 'מכור את ספרך ישירות לקוראים — ללא עמלות, ללא מתווכים.',
     locale: 'he_IL',
     type: 'website',
+    images: [{ url: '/logo.png' }],
   },
 };
 

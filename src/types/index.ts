@@ -44,7 +44,6 @@ export interface Book {
   description: string;
   price: number;
   coverUrl: string;
-  weightGrams: number;
   genre?: string;
   salesCount: number;
   isPublished: boolean;
