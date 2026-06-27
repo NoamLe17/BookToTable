@@ -223,11 +223,24 @@ export default function CheckoutPage() {
               </h2>
 
               {/* Early-stage platform notice */}
-              <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 flex items-start gap-3">
-                <Info size={18} className="text-amber-600 shrink-0 mt-0.5" />
-                <div className="text-sm text-amber-800">
-                  <p className="font-bold mb-0.5">שימו לב — שלב ראשון של הפלטפורמה 🚀</p>
-                  <p>זוהי תחילתו של BookToTable. בשלב זה המשלוחים מנוהלים ישירות מול הסופר. בהמשך האתר יתחבר לחברת שליחויות לניהול אוטומטי מלא. אנחנו מתנצלים על כל אי-נוחות זמנית ומודים לכם על הסבלנות! 🙏</p>
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 mb-6">
+                <div className="flex items-start gap-3 mb-3">
+                  <Info size={20} className="text-amber-600 shrink-0 mt-0.5" />
+                  <p className="font-bold text-amber-900 text-base">איך עובד המשלוח כרגע? 🚀</p>
+                </div>
+                <div className="text-sm text-amber-800 space-y-2 leading-relaxed pr-7">
+                  <p>
+                    BookToTable נמצאת בשלבי ההשקה הראשונים שלה. בשלב זה, <strong>כל ספר נשלח ישירות מהסופר אליך</strong> — הסופר עצמו אורז את הספר ושולח אותו בדואר או בחברת שליחויות, בדיוק כמו שמוכר בשוק הפרטי היה עושה.
+                  </p>
+                  <p>
+                    <strong>מה קורה לאחר ההזמנה?</strong> הסופר מקבל את פרטי ההזמנה, מוודא שהתשלום הגיע, אורז ושולח. כשהוא מסמן ״נשלח״ — תקבל מייל עם מספר מעקב.
+                  </p>
+                  <p>
+                    <strong>בהמשך</strong>, האתר יתחבר לחברת שליחויות שתאפשר הזמנת שליח, הדפסת שובר ומעקב אוטומטי — הכל מהאתר, ללא צורך בתיאום ידני.
+                  </p>
+                  <p className="text-amber-700">
+                    🙏 אנחנו מתנצלים על אי-הנוחות הזמנית ומודים לך על האמון. ניצור איתך קשר אם יהיו עדכונים.
+                  </p>
                 </div>
               </div>
               
