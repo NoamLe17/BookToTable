@@ -15,6 +15,7 @@ const heebo = Heebo({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://booktotable.com'),
   title: 'Book To Table | מהסופר לשולחן הקריאה',
   description:
     'Book To Table – הפלטפורמה הראשונה בישראל שמאפשרת לסופרים עצמאיים למכור ספרים ישירות לקוראים. ללא עמלות, ללא מתווכים — מהסופר לשולחן הקריאה.',
