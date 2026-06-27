@@ -221,39 +221,97 @@ export default function CheckoutPage() {
                 <Truck className="text-green-600" />
                 שיטת משלוח
               </h2>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                {/* Method 1: Direct */}
-                <label className={`cursor-pointer border-2 rounded-xl p-4 flex flex-col items-center text-center transition-all ${shippingMethod === 'direct' ? 'border-green-600 bg-green-50' : 'border-gray-200 hover:border-gray-300'}`}>
-                  <input type="radio" name="shippingMethod" className="sr-only" checked={shippingMethod === 'direct'} onChange={() => setShippingMethod('direct')} />
-                  <Truck size={28} className={`mb-2 ${shippingMethod === 'direct' ? 'text-green-600' : 'text-gray-400'}`} />
-                  <span className="font-bold text-gray-900">משלוח עד הבית</span>
-                  <span className="text-xs text-gray-500 mt-1">יגיע ישירות מהסופר אליך</span>
-                </label>
 
-                {/* Method 2: Pickup Point */}
-                <label className={`cursor-pointer border-2 rounded-xl p-4 flex flex-col items-center text-center transition-all ${shippingMethod === 'pickup_point' ? 'border-green-600 bg-green-50' : 'border-gray-200 hover:border-gray-300'}`}>
-                  <input type="radio" name="shippingMethod" className="sr-only" checked={shippingMethod === 'pickup_point'} onChange={() => setShippingMethod('pickup_point')} />
-                  <MapPin size={28} className={`mb-2 ${shippingMethod === 'pickup_point' ? 'text-green-600' : 'text-gray-400'}`} />
-                  <span className="font-bold text-gray-900">נקודת חלוקה</span>
-                  <span className="text-xs text-gray-500 mt-1">איסוף מלוקר או חנות קרובה</span>
-                </label>
-
-                {/* Method 3: Self Pickup */}
-                <label className={`cursor-pointer border-2 rounded-xl p-4 flex flex-col items-center text-center transition-all ${shippingMethod === 'self_pickup' ? 'border-green-600 bg-green-50' : 'border-gray-200 hover:border-gray-300'}`}>
-                  <input type="radio" name="shippingMethod" className="sr-only" checked={shippingMethod === 'self_pickup'} onChange={() => setShippingMethod('self_pickup')} />
-                  <Store size={28} className={`mb-2 ${shippingMethod === 'self_pickup' ? 'text-green-600' : 'text-gray-400'}`} />
-                  <span className="font-bold text-gray-900">איסוף עצמי</span>
-                  <span className="text-xs text-gray-500 mt-1">ללא עלות, איסוף פיזי מהסופר</span>
-                </label>
+              {/* Early-stage platform notice */}
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 flex items-start gap-3">
+                <Info size={18} className="text-amber-600 shrink-0 mt-0.5" />
+                <div className="text-sm text-amber-800">
+                  <p className="font-bold mb-0.5">שימו לב — שלב ראשון של הפלטפורמה 🚀</p>
+                  <p>זוהי תחילתו של BookToTable. בשלב זה המשלוחים מנוהלים ישירות מול הסופר. בהמשך האתר יתחבר לחברת שליחויות לניהול אוטומטי מלא. אנחנו מתנצלים על כל אי-נוחות זמנית ומודים לכם על הסבלנות! 🙏</p>
+                </div>
               </div>
+              
+              {/* Dynamic shipping options based on author settings */}
+              {(() => {
+                const authorIds = Object.keys(itemsByAuthor);
+                // Merge shipping options across all authors: only show method if ALL authors support it
+                const mergedOptions = authorIds.reduce((acc, authorId) => {
+                  const opts = authorsData[authorId]?.shippingOptions;
+                  // If no shippingOptions set yet (legacy), default to direct=true
+                  const direct = opts ? opts.direct : true;
+                  const pickupPoint = opts ? opts.pickupPoint : false;
+                  const selfPickup = opts ? opts.selfPickup : false;
+                  return {
+                    direct: acc.direct && direct,
+                    pickupPoint: acc.pickupPoint && pickupPoint,
+                    selfPickup: acc.selfPickup && selfPickup,
+                  };
+                }, { direct: true, pickupPoint: true, selfPickup: true });
+
+                // If no authors loaded yet, show all (will refine once loaded)
+                const hasAuthors = authorIds.length > 0 && Object.keys(authorsData).length > 0;
+                const showDirect = !hasAuthors || mergedOptions.direct;
+                const showPickupPoint = !hasAuthors || mergedOptions.pickupPoint;
+                const showSelfPickup = !hasAuthors || mergedOptions.selfPickup;
+
+                // Ensure selected method is valid
+                if (hasAuthors) {
+                  if (shippingMethod === 'direct' && !showDirect) setShippingMethod(showPickupPoint ? 'pickup_point' : 'self_pickup');
+                  if (shippingMethod === 'pickup_point' && !showPickupPoint) setShippingMethod(showDirect ? 'direct' : 'self_pickup');
+                  if (shippingMethod === 'self_pickup' && !showSelfPickup) setShippingMethod(showDirect ? 'direct' : 'pickup_point');
+                }
+
+                return (
+                  <div className={`grid grid-cols-1 gap-4 mb-8 ${
+                    [showDirect, showPickupPoint, showSelfPickup].filter(Boolean).length === 1 ? 'md:grid-cols-1 max-w-sm' :
+                    [showDirect, showPickupPoint, showSelfPickup].filter(Boolean).length === 2 ? 'md:grid-cols-2' :
+                    'md:grid-cols-3'
+                  }`}>
+                    {showDirect && (
+                      <label className={`cursor-pointer border-2 rounded-xl p-4 flex flex-col items-center text-center transition-all ${shippingMethod === 'direct' ? 'border-green-600 bg-green-50' : 'border-gray-200 hover:border-gray-300'}`}>
+                        <input type="radio" name="shippingMethod" className="sr-only" checked={shippingMethod === 'direct'} onChange={() => setShippingMethod('direct')} />
+                        <Truck size={28} className={`mb-2 ${shippingMethod === 'direct' ? 'text-green-600' : 'text-gray-400'}`} />
+                        <span className="font-bold text-gray-900">משלוח עד הבית</span>
+                        <span className="text-xs text-gray-500 mt-1">יגיע ישירות מהסופר אליך</span>
+                      </label>
+                    )}
+
+                    {showPickupPoint && (
+                      <label className={`cursor-pointer border-2 rounded-xl p-4 flex flex-col items-center text-center transition-all ${shippingMethod === 'pickup_point' ? 'border-green-600 bg-green-50' : 'border-gray-200 hover:border-gray-300'}`}>
+                        <input type="radio" name="shippingMethod" className="sr-only" checked={shippingMethod === 'pickup_point'} onChange={() => setShippingMethod('pickup_point')} />
+                        <MapPin size={28} className={`mb-2 ${shippingMethod === 'pickup_point' ? 'text-green-600' : 'text-gray-400'}`} />
+                        <span className="font-bold text-gray-900">נקודת חלוקה</span>
+                        <span className="text-xs text-gray-500 mt-1">איסוף מלוקר או חנות קרובה</span>
+                        <span className="text-xs text-orange-500 font-bold mt-1">בקרוב!</span>
+                      </label>
+                    )}
+
+                    {showSelfPickup && (
+                      <label className={`cursor-pointer border-2 rounded-xl p-4 flex flex-col items-center text-center transition-all ${shippingMethod === 'self_pickup' ? 'border-green-600 bg-green-50' : 'border-gray-200 hover:border-gray-300'}`}>
+                        <input type="radio" name="shippingMethod" className="sr-only" checked={shippingMethod === 'self_pickup'} onChange={() => setShippingMethod('self_pickup')} />
+                        <Store size={28} className={`mb-2 ${shippingMethod === 'self_pickup' ? 'text-green-600' : 'text-gray-400'}`} />
+                        <span className="font-bold text-gray-900">איסוף עצמי</span>
+                        <span className="text-xs text-gray-500 mt-1">ללא עלות, איסוף פיזי מהסופר</span>
+                        <span className="text-xs text-green-600 font-bold mt-1">הנחה 10%!</span>
+                      </label>
+                    )}
+
+                    {!showDirect && !showPickupPoint && !showSelfPickup && (
+                      <div className="col-span-3 bg-red-50 border border-red-200 text-red-800 p-4 rounded-xl text-center text-sm">
+                        <p className="font-bold mb-1">הסופר טרם הגדיר אפשרויות משלוח</p>
+                        <p>אנא צור קשר עם הסופר לפני ביצוע ההזמנה.</p>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
 
               {shippingMethod === 'pickup_point' && (
                 <div className="bg-orange-50 border border-orange-200 text-orange-800 p-6 rounded-xl flex items-start gap-4">
                   <Info className="shrink-0 mt-0.5" />
                   <div>
-                    <h3 className="font-bold mb-1">שירות נקודות חלוקה אינו זמין כרגע</h3>
-                    <p className="text-sm">צוות האתר פועל במרץ מול חברות השליחויות כדי לשלב את השירות הזה בקרוב. אנא בחר בינתיים בשיטת משלוח אחרת.</p>
+                    <h3 className="font-bold mb-1">שירות נקודות חלוקה — בקרוב!</h3>
+                    <p className="text-sm">הצוות שלנו עובד על חיבור לחברת שליחויות עם רשת נקודות חלוקה ולוקרים בכל רחבי הארץ. השירות יהיה זמין בהמשך. בינתיים אנא בחר שיטת משלוח אחרת.</p>
                   </div>
                 </div>
               )}

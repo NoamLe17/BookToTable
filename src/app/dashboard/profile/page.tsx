@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, Suspense } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { Settings, HelpCircle, X } from 'lucide-react';
+import { Settings, HelpCircle, X, Truck, MapPin, Store, AlertCircle } from 'lucide-react';
 import { doc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '@/lib/firebase';
@@ -41,6 +41,12 @@ function ProfileContent() {
   const [pickupCity, setPickupCity] = useState(user?.pickupAddress?.city || '');
   const [pickupStreet, setPickupStreet] = useState(user?.pickupAddress?.street || '');
   const [pickupZip, setPickupZip] = useState(user?.pickupAddress?.zip || '');
+
+  // Shipping Options State
+  const [shippingDirect, setShippingDirect] = useState(user?.shippingOptions?.direct ?? true);
+  const [shippingPickupPoint, setShippingPickupPoint] = useState(user?.shippingOptions?.pickupPoint ?? false);
+  const [shippingSelfPickup, setShippingSelfPickup] = useState(user?.shippingOptions?.selfPickup ?? false);
+
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [savingSettings, setSavingSettings] = useState(false);
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
@@ -68,6 +74,9 @@ function ProfileContent() {
           setPickupCity(u.pickupAddress?.city || '');
           setPickupStreet(u.pickupAddress?.street || '');
           setPickupZip(u.pickupAddress?.zip || '');
+          setShippingDirect(u.shippingOptions?.direct ?? true);
+          setShippingPickupPoint(u.shippingOptions?.pickupPoint ?? false);
+          setShippingSelfPickup(u.shippingOptions?.selfPickup ?? false);
         }
       } else {
         setTargetUser(user);
@@ -89,6 +98,9 @@ function ProfileContent() {
           setPickupCity(user.pickupAddress?.city || '');
           setPickupStreet(user.pickupAddress?.street || '');
           setPickupZip(user.pickupAddress?.zip || '');
+          setShippingDirect(user.shippingOptions?.direct ?? true);
+          setShippingPickupPoint(user.shippingOptions?.pickupPoint ?? false);
+          setShippingSelfPickup(user.shippingOptions?.selfPickup ?? false);
         }
       }
     }
@@ -131,6 +143,11 @@ function ProfileContent() {
           city: pickupCity,
           street: pickupStreet,
           zip: pickupZip,
+        },
+        shippingOptions: {
+          direct: shippingDirect,
+          pickupPoint: shippingPickupPoint,
+          selfPickup: shippingSelfPickup,
         },
         ...(avatarUrl && { avatarUrl })
       });
@@ -291,7 +308,78 @@ function ProfileContent() {
               </div>
 
               <div className="pt-4 border-t border-gray-100">
-                <h3 className="text-md font-bold text-gray-900 mb-4">פרטי איסוף לשליח</h3>
+                <h3 className="text-md font-bold text-gray-900 mb-1 flex items-center gap-2">
+                  <Truck size={18} className="text-green-600" />
+                  אפשרויות משלוח שאציע לקוראים
+                </h3>
+                <p className="text-sm text-gray-500 mb-4">
+                  סמן אילו אפשרויות משלוח יופיעו לקונה בעת ביצוע הזמנה. חייבת להיות מסומנת לפחות אפשרות אחת.
+                </p>
+
+                <div className="space-y-3">
+                  {/* Direct Shipping */}
+                  <div className={`rounded-xl border-2 p-4 transition-all ${shippingDirect ? 'border-green-400 bg-green-50' : 'border-gray-200 bg-gray-50'}`}>
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={shippingDirect}
+                        onChange={(e) => setShippingDirect(e.target.checked)}
+                        className="w-5 h-5 text-green-600 rounded accent-green-600"
+                      />
+                      <Truck size={18} className={shippingDirect ? 'text-green-600' : 'text-gray-400'} />
+                      <div>
+                        <span className="font-bold text-gray-800 block">משלוח עד הבית</span>
+                        <span className="text-xs text-gray-500">הספר יישלח בדואר / שליח ישירות לכתובת הקורא. עלות: חינם עד 40 ק"מ, תוספת 15₪ מעל.</span>
+                      </div>
+                    </label>
+                  </div>
+
+                  {/* Pickup Point */}
+                  <div className={`rounded-xl border-2 p-4 transition-all ${shippingPickupPoint ? 'border-blue-400 bg-blue-50' : 'border-gray-200 bg-gray-50'}`}>
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={shippingPickupPoint}
+                        onChange={(e) => setShippingPickupPoint(e.target.checked)}
+                        className="w-5 h-5 text-blue-600 rounded accent-blue-600"
+                      />
+                      <MapPin size={18} className={shippingPickupPoint ? 'text-blue-600' : 'text-gray-400'} />
+                      <div>
+                        <span className="font-bold text-gray-800 block">נקודת חלוקה / לוקר</span>
+                        <span className="text-xs text-gray-500">הקורא בוחר נקודת איסוף קרובה אליו. <span className="font-bold text-orange-600">שירות זה בפיתוח — יופעל בקרוב!</span></span>
+                      </div>
+                    </label>
+                  </div>
+
+                  {/* Self Pickup */}
+                  <div className={`rounded-xl border-2 p-4 transition-all ${shippingSelfPickup ? 'border-purple-400 bg-purple-50' : 'border-gray-200 bg-gray-50'}`}>
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={shippingSelfPickup}
+                        onChange={(e) => setShippingSelfPickup(e.target.checked)}
+                        className="w-5 h-5 text-purple-600 rounded accent-purple-600"
+                      />
+                      <Store size={18} className={shippingSelfPickup ? 'text-purple-600' : 'text-gray-400'} />
+                      <div>
+                        <span className="font-bold text-gray-800 block">איסוף עצמי מהסופר</span>
+                        <span className="text-xs text-gray-500">הקורא מגיע ישירות אליך. הוא יקבל <strong>הנחה של 10%</strong>. יש להזין כתובת איסוף למטה.</span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                {!shippingDirect && !shippingPickupPoint && !shippingSelfPickup && (
+                  <div className="mt-3 flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 text-sm p-3 rounded-lg">
+                    <AlertCircle size={16} />
+                    <span>חובה לסמן לפחות אפשרות משלוח אחת כדי שקוראים יוכלו לרכוש את ספריך!</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="pt-4 border-t border-gray-100">
+                <h3 className="text-md font-bold text-gray-900 mb-1">פרטי כתובת לאיסוף / שליח</h3>
+                <p className="text-xs text-gray-500 mb-4">כתובת זו תוצג לקוראים שבוחרים &quot;איסוף עצמי&quot;, ותשמש לחישוב עלות משלוח.</p>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                   <div>

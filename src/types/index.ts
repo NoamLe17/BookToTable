@@ -28,6 +28,11 @@ export interface User {
     zip: string;
     phone: string;
   };
+  shippingOptions?: {
+    direct: boolean;       // משלוח עד הבית
+    pickupPoint: boolean;  // נקודת חלוקה / לוקר
+    selfPickup: boolean;   // איסוף עצמי מהסופר
+  };
   createdAt: number;
 }
 

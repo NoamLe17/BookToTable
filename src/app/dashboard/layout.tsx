@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
-import { LayoutDashboard, Book, Settings, LogOut, Package } from 'lucide-react';
+import { LayoutDashboard, Book, Settings, LogOut, Package, BookOpen } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -33,6 +33,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { name: 'הספרים שלי', href: '#books', id: 'books', icon: Book },
     { name: 'הזמנות', href: '#orders', id: 'orders', icon: Package },
     { name: 'עריכת פרופיל', href: '/dashboard/profile', id: 'profile', icon: Settings },
+    { name: 'מדריך לסופר', href: '/dashboard/guide', id: 'guide', icon: BookOpen },
   ];
 
   return (
