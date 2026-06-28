@@ -111,10 +111,10 @@ function Callout({
   children: React.ReactNode;
 }) {
   const styles = {
-    blue:   'bg-blue-50   border-blue-200   text-blue-900',
-    green:  'bg-green-50  border-green-200  text-green-900',
+    blue: 'bg-blue-50   border-blue-200   text-blue-900',
+    green: 'bg-green-50  border-green-200  text-green-900',
     orange: 'bg-orange-50 border-orange-200 text-orange-900',
-    red:    'bg-red-50    border-red-200    text-red-900',
+    red: 'bg-red-50    border-red-200    text-red-900',
     purple: 'bg-purple-50 border-purple-200 text-purple-900',
   };
   return (

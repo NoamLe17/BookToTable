@@ -9,6 +9,34 @@ export default function Footer() {
   const [isFaqOpen, setIsFaqOpen] = useState(false);
   const [isContactOpen, setIsContactOpen] = useState(false);
 
+  const [contactForm, setContactForm] = useState({ name: '', email: '', message: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [contactSuccess, setContactSuccess] = useState(false);
+  const [contactError, setContactError] = useState('');
+
+  const handleContactSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setContactError('');
+
+    try {
+      const res = await fetch('/api/email/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(contactForm),
+      });
+
+      if (!res.ok) throw new Error('שגיאה בשליחת הפנייה');
+
+      setContactSuccess(true);
+      setContactForm({ name: '', email: '', message: '' });
+    } catch (err) {
+      setContactError('אירעה שגיאה. אנא נסה שוב מאוחר יותר.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <footer className="bg-white border-t border-gray-200 mt-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -39,9 +67,9 @@ export default function Footer() {
               <a href="#" className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-green-500 hover:text-white transition-all">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg>
               </a>
-              <a href="mailto:noamhemo2001@gmail.com" className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-green-500 hover:text-white transition-all">
+              <button onClick={() => setIsContactOpen(true)} className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-green-500 hover:text-white transition-all">
                 <Mail className="w-4 h-4" />
-              </a>
+              </button>
             </div>
           </div>
 
@@ -141,13 +169,43 @@ export default function Footer() {
               </button>
             </div>
             <div className="p-6">
-              <p className="text-sm text-gray-600 mb-6 leading-relaxed">
-                נשמח לעמוד לשירותך בכל שאלה. תוכל לשלוח לנו הודעה ישירות למייל, ואנו נשתדל לענות בהקדם האפשרי.
-              </p>
-              <a href="mailto:noamhemo2001@gmail.com" className="flex items-center justify-center gap-3 w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-xl font-bold transition-all">
-                <Mail size={20} />
-                שלח אימייל (noamhemo2001@gmail.com)
-              </a>
+              {contactSuccess ? (
+                <div className="text-center py-6">
+                  <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">הפנייה נשלחה בהצלחה!</h3>
+                  <p className="text-gray-600 mb-6">תודה שפנית אלינו, נחזור אליך בהקדם.</p>
+                  <button onClick={() => { setIsContactOpen(false); setContactSuccess(false); }} className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-2 px-6 rounded-xl transition-all">סגור</button>
+                </div>
+              ) : (
+                <form onSubmit={handleContactSubmit} className="space-y-4">
+                  <p className="text-sm text-gray-600 mb-4 leading-relaxed">
+                    נשמח לעמוד לשירותך בכל שאלה. השאר פרטים ונחזור אליך בהקדם:
+                  </p>
+                  
+                  {contactError && <div className="text-red-500 text-sm mb-4">{contactError}</div>}
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">שם מלא</label>
+                    <input required type="text" value={contactForm.name} onChange={e => setContactForm({...contactForm, name: e.target.value})} className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-green-500 outline-none text-right" dir="rtl" />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">אימייל לחזרה</label>
+                    <input required type="email" value={contactForm.email} onChange={e => setContactForm({...contactForm, email: e.target.value})} className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-green-500 outline-none text-left" dir="ltr" />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">תוכן הפנייה</label>
+                    <textarea required rows={4} value={contactForm.message} onChange={e => setContactForm({...contactForm, message: e.target.value})} className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-green-500 outline-none resize-none text-right" dir="rtl" />
+                  </div>
+                  
+                  <button type="submit" disabled={isSubmitting} className="w-full bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-bold py-3 rounded-xl transition-all mt-4">
+                    {isSubmitting ? 'שולח...' : 'שלח פנייה'}
+                  </button>
+                </form>
+              )}
             </div>
           </div>
         </div>
