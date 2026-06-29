@@ -16,12 +16,12 @@ const heebo = Heebo({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://booktotable.com'),
-  title: 'Book To Table | סיפור מקומי',
+  title: 'Book To Table | סיפור קרוב',
   description:
-    'Book To Table – הפלטפורמה הראשונה בישראל שמאפשרת לסופרים עצמאיים למכור ספרים ישירות לקוראים. ללא עמלות, ללא מתווכים — סיפור מקומי מהסופר לשולחן הקריאה.',
-  keywords: 'ספרים, סופרים עצמאיים, Book To Table, BookToTable, סיפור מקומי, מהסופר לשולחן הקריאה, מכירת ספרים, ישראל, ספרים ישראלים',
+    'Book To Table – הפלטפורמה הראשונה בישראל שמאפשרת לסופרים עצמאיים למכור ספרים ישירות לקוראים. ללא עמלות, ללא מתווכים — סיפור קרוב מהסופר לשולחן הקריאה.',
+  keywords: 'ספרים, סופרים עצמאיים, Book To Table, BookToTable, סיפור קרוב, מהסופר לשולחן הקריאה, מכירת ספרים, ישראל, ספרים ישראלים',
   openGraph: {
-    title: 'Book To Table | סיפור מקומי',
+    title: 'Book To Table | סיפור קרוב',
     description: 'מכור את ספרך ישירות לקוראים — ללא עמלות, ללא מתווכים.',
     locale: 'he_IL',
     type: 'website',
