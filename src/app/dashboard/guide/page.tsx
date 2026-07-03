@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { useAuth } from '@/hooks/useAuth';
 import {
   BookOpen,
   Package,
@@ -175,24 +174,6 @@ function StepBadge({ n, label, desc }: { n: string; label: string; desc: string 
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function AuthorGuidePage() {
-  const { user } = useAuth();
-
-  if (!user) {
-    return (
-      <div className="flex flex-col items-center justify-center py-24 text-center px-4">
-        <AlertCircle size={52} className="text-red-400 mb-4" />
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">גישה מוגבלת</h2>
-        <p className="text-gray-500 mb-6 text-lg">עמוד זה זמין לסופרים רשומים בלבד.</p>
-        <Link
-          href="/auth"
-          className="bg-green-600 text-white font-bold px-7 py-3.5 rounded-xl hover:bg-green-700 transition-colors text-base"
-        >
-          התחברות / הרשמה
-        </Link>
-      </div>
-    );
-  }
-
   return (
     <div className="pb-24 max-w-3xl mx-auto">
 
