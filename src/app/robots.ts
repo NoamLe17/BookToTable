@@ -5,8 +5,15 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: '*',
       allow: '/',
-      disallow: ['/api/', '/admin/'], // Adjust if you have paths you don't want Google to index
+      disallow: [
+        '/api/',
+        '/admin/',
+        '/dashboard/',
+        '/checkout/',
+        '/cart/',
+        '/auth/register',
+      ],
     },
-    sitemap: 'https://booktotable.com/sitemap.xml',
+    sitemap: 'https://www.booktotable.com/sitemap.xml',
   };
 }

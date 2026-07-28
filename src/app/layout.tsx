@@ -15,17 +15,31 @@ const heebo = Heebo({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://booktotable.com'),
+  metadataBase: new URL('https://www.booktotable.com'),
   title: 'Book To Table | סיפור קרוב',
   description:
     'Book To Table – הפלטפורמה הראשונה בישראל שמאפשרת לסופרים עצמאיים למכור ספרים ישירות לקוראים. ללא עמלות, ללא מתווכים — סיפור קרוב מהסופר לשולחן הקריאה.',
   keywords: 'ספרים, סופרים עצמאיים, Book To Table, BookToTable, סיפור קרוב, מהסופר לשולחן הקריאה, מכירת ספרים, ישראל, ספרים ישראלים',
+  verification: {
+    google: 'google08a49ad78361bdba',
+  },
+  alternates: {
+    canonical: 'https://www.booktotable.com',
+  },
   openGraph: {
     title: 'Book To Table | סיפור קרוב',
     description: 'מכור את ספרך ישירות לקוראים — ללא עמלות, ללא מתווכים.',
+    url: 'https://www.booktotable.com',
+    siteName: 'Book To Table',
     locale: 'he_IL',
     type: 'website',
-    images: [{ url: '/logo.png' }],
+    images: [{ url: '/logo.png', width: 1200, height: 630, alt: 'Book To Table' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Book To Table | סיפור קרוב',
+    description: 'מכור את ספרך ישירות לקוראים — ללא עמלות, ללא מתווכים.',
+    images: ['/logo.png'],
   },
 };
 
