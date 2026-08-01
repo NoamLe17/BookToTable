@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 
-// Hardcoded for MVP based on user's input
-const resend = new Resend('re_DTeFKd2R_ByHXKUvq9EBb5mk1sEU52xWo');
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(request: Request) {
   try {
@@ -61,12 +60,13 @@ export async function POST(request: Request) {
       </div>
     `;
 
-    // Note: Free Resend accounts can only send to verified emails or you must use a verified domain.
-    // Assuming the user will configure Resend correctly, we use a default from email for Resend testing.
-    // Typically, Resend defaults to sending from "onboarding@resend.dev" on free tier to the registered email.
+    // IMPORTANT: To send to any email address, you must verify your domain in Resend dashboard.
+    // For production, set RESEND_FROM_EMAIL in env vars to: "BookToTable <noreply@booktotable.com>"
+    // For testing on free tier, Resend only sends to your registered email.
+    const fromEmail = process.env.RESEND_FROM_EMAIL || 'BookToTable <onboarding@resend.dev>';
     
     const { data, error } = await resend.emails.send({
-      from: 'BookToTable <onboarding@resend.dev>', // Free tier restricted
+      from: fromEmail,
       to: [readerDetails.email],
       subject: 'אישור הזמנה - BookToTable 🎉',
       html: htmlContent,

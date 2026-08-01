@@ -19,13 +19,23 @@ export async function generateMetadata({ params }: BookPageProps): Promise<impor
     return { title: 'ספר לא נמצא | BookToTable' };
   }
 
+  const canonicalUrl = `https://www.booktotable.com/books/${resolvedParams.id}`;
+  const description = book.description.length > 157
+    ? book.description.substring(0, 157) + '...'
+    : book.description;
+
   return {
     title: `${book.title} מאת ${book.authorName} | BookToTable`,
-    description: book.description.substring(0, 160) + '...',
+    description,
+    alternates: {
+      canonical: canonicalUrl,
+    },
     openGraph: {
       title: `${book.title} מאת ${book.authorName}`,
-      description: book.description.substring(0, 160) + '...',
-      images: book.coverUrl ? [{ url: book.coverUrl }] : [],
+      description,
+      url: canonicalUrl,
+      type: 'book',
+      images: book.coverUrl ? [{ url: book.coverUrl, alt: `כריכת הספר ${book.title}` }] : [],
     },
   };
 }
@@ -41,6 +51,35 @@ export default async function BookPage({ params }: BookPageProps) {
 
   return (
     <div className="bg-gray-50 min-h-[calc(100vh-80px)] py-12">
+      {/* JSON-LD Structured Data for SEO */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'Book',
+            name: book.title,
+            author: {
+              '@type': 'Person',
+              name: book.authorName,
+            },
+            offers: {
+              '@type': 'Offer',
+              price: book.price,
+              priceCurrency: 'ILS',
+              availability: 'https://schema.org/InStock',
+              url: `https://www.booktotable.com/books/${book.id}`,
+            },
+            description: book.description,
+            image: book.coverUrl || undefined,
+            inLanguage: 'he',
+            publisher: {
+              '@type': 'Organization',
+              name: 'BookToTable',
+            },
+          }),
+        }}
+      />
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Breadcrumb */}

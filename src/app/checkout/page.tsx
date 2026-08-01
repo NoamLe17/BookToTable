@@ -190,10 +190,13 @@ export default function CheckoutPage() {
     setValue('zip', '');
   };
 
-  if (items.length === 0) {
-    if (typeof window !== 'undefined') {
-      setTimeout(() => router.push('/'), 0);
+  useEffect(() => {
+    if (items.length === 0) {
+      router.replace('/');
     }
+  }, [items.length, router]);
+
+  if (items.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <p className="text-gray-500 font-medium">העגלה ריקה. מועבר חזרה לחנות...</p>

@@ -47,8 +47,6 @@ export async function updateUser(userId: string, data: Partial<User>): Promise<v
 }
 
 // ==================== BOOKS ====================
-const mockBooks: Book[] = [];
-
 export async function getBooks(limitCount = 20): Promise<Book[]> {
   try {
     const q = query(
@@ -207,8 +205,6 @@ export async function getFanMailByAuthor(authorId: string): Promise<FanMail[]> {
 }
 
 // ==================== AUTHORS ====================
-const mockAuthors: User[] = [];
-
 export async function getTrendingAuthors(limitCount = 6): Promise<User[]> {
   try {
     const q = query(
