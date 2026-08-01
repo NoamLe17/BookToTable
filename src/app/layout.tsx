@@ -66,6 +66,34 @@ export default function RootLayout({
           `}
         </Script>
 
+        {/* JSON-LD Schemas for SEO */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify([
+              {
+                '@context': 'https://schema.org',
+                '@type': 'Organization',
+                name: 'BookToTable',
+                url: 'https://www.booktotable.com',
+                logo: 'https://www.booktotable.com/logo.png',
+                description: 'הפלטפורמה הראשונה בישראל שמאפשרת לסופרים עצמאיים למכור ספרים ישירות לקוראים.',
+              },
+              {
+                '@context': 'https://schema.org',
+                '@type': 'WebSite',
+                name: 'BookToTable',
+                url: 'https://www.booktotable.com',
+                potentialAction: {
+                  '@type': 'SearchAction',
+                  target: 'https://www.booktotable.com/books?q={search_term_string}',
+                  'query-input': 'required name=search_term_string',
+                },
+              },
+            ]),
+          }}
+        />
+
         <CartProvider>
           <Toaster
             position="top-center"
