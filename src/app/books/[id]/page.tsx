@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: BookPageProps): Promise<impor
   const book = await getBookById(resolvedParams.id);
   
   if (!book) {
-    return { title: 'ספר לא נמצא | BookToTable' };
+    return { title: 'ספר לא נמצא | סיפור קרוב' };
   }
 
   const canonicalUrl = `https://www.booktotable.com/books/${resolvedParams.id}`;
@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: BookPageProps): Promise<impor
     : book.description;
 
   return {
-    title: `${book.title} מאת ${book.authorName} | BookToTable`,
+    title: `${book.title} מאת ${book.authorName} | סיפור קרוב`,
     description,
     alternates: {
       canonical: canonicalUrl,
@@ -76,7 +76,7 @@ export default async function BookPage({ params }: BookPageProps) {
               inLanguage: 'he',
               publisher: {
                 '@type': 'Organization',
-                name: 'BookToTable',
+                name: 'סיפור קרוב',
               },
             },
             {

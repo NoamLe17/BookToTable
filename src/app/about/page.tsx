@@ -5,14 +5,14 @@ import { BookOpen, Heart, Award, ShieldCheck, Users } from 'lucide-react';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'אודות | Book To Table',
-  description: 'הסיפור של Book To Table — הפלטפורמה הישראלית שמחברת סופרים עצמאיים ישירות לקוראים. ללא עמלות, ללא מתווכים. 100% מהמכירה הולך לסופר.',
+  title: 'אודות סיפור קרוב | BookToTable',
+  description: 'הסיפור של סיפור קרוב (BookToTable) — הפלטפורמה הישראלית שמחברת סופרים עצמאיים ישירות לקוראים. ללא עמלות, ללא מתווכים. 100% מהמכירה הולך לסופר.',
   alternates: {
     canonical: 'https://www.booktotable.com/about',
   },
   openGraph: {
-    title: 'אודות | Book To Table',
-    description: 'הפלטפורמה הישראלית שמחברת סופרים עצמאיים ישירות לקוראים.',
+    title: 'אודות סיפור קרוב | BookToTable',
+    description: 'סיפור קרוב — הפלטפורמה הישראלית שמחברת סופרים עצמאיים ישירות לקוראים.',
     url: 'https://www.booktotable.com/about',
     type: 'website',
   },

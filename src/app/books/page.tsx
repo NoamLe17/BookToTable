@@ -4,14 +4,14 @@ import { getBooks } from '@/lib/firestore';
 import BooksStore from '@/components/marketplace/BooksStore';
 
 export const metadata: Metadata = {
-  title: 'חנות ספרים | Book To Table',
-  description: 'גלה ספרים של סופרים ישראלים עצמאיים. קנה ספרים ישירות מהסופר — בלי עמלות ובלי מתווכים. משלוח עד הבית.',
+  title: 'חנות ספרים | סיפור קרוב — BookToTable',
+  description: 'גלו ספרים של סופרים ישראלים עצמאיים בסיפור קרוב. קנו ספרים ישירות מהסופר — בלי עמלות ובלי מתווכים. משלוח עד הבית.',
   alternates: {
     canonical: 'https://www.booktotable.com/books',
   },
   openGraph: {
-    title: 'חנות ספרים | Book To Table',
-    description: 'גלה ספרים של סופרים ישראלים עצמאיים. קנה ישירות מהסופר.',
+    title: 'חנות ספרים | סיפור קרוב — BookToTable',
+    description: 'גלו ספרים של סופרים ישראלים עצמאיים בסיפור קרוב. קנו ישירות מהסופר.',
     url: 'https://www.booktotable.com/books',
     type: 'website',
   },

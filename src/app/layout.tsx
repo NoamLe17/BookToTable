@@ -16,10 +16,10 @@ const heebo = Heebo({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.booktotable.com'),
-  title: 'Book To Table | סיפור קרוב',
+  title: 'סיפור קרוב — מהסופר לשולחן הקריאה | BookToTable',
   description:
-    'Book To Table – הפלטפורמה הראשונה בישראל שמאפשרת לסופרים עצמאיים למכור ספרים ישירות לקוראים. ללא עמלות, ללא מתווכים — סיפור קרוב מהסופר לשולחן הקריאה.',
-  keywords: 'ספרים, סופרים עצמאיים, Book To Table, BookToTable, סיפור קרוב, מהסופר לשולחן הקריאה, מכירת ספרים, ישראל, ספרים ישראלים',
+    'סיפור קרוב (BookToTable) — הפלטפורמה הראשונה בישראל שמאפשרת לסופרים עצמאיים למכור ספרים ישירות לקוראים. ללא עמלות, ללא מתווכים. 100% מהמכירה הולך ישירות לסופר.',
+  keywords: 'סיפור קרוב, ספרים, סופרים עצמאיים, BookToTable, Book To Table, מהסופר לשולחן הקריאה, מכירת ספרים, ספרים ישראלים, קניית ספרים ישראל, ספרים ישירות מהסופר, ספרים בלי מתווכים',
   verification: {
     google: 'google08a49ad78361bdba',
   },
@@ -27,18 +27,18 @@ export const metadata: Metadata = {
     canonical: 'https://www.booktotable.com',
   },
   openGraph: {
-    title: 'Book To Table | סיפור קרוב',
-    description: 'מכור את ספרך ישירות לקוראים — ללא עמלות, ללא מתווכים.',
+    title: 'סיפור קרוב — מהסופר לשולחן הקריאה | BookToTable',
+    description: 'סיפור קרוב — מכור את ספרך ישירות לקוראים. ללא עמלות, ללא מתווכים. הפלטפורמה הראשונה בישראל לסופרים עצמאיים.',
     url: 'https://www.booktotable.com',
-    siteName: 'Book To Table',
+    siteName: 'סיפור קרוב | BookToTable',
     locale: 'he_IL',
     type: 'website',
-    images: [{ url: '/logo.png', width: 1200, height: 630, alt: 'Book To Table' }],
+    images: [{ url: '/logo.png', width: 1200, height: 630, alt: 'סיפור קרוב — BookToTable' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Book To Table | סיפור קרוב',
-    description: 'מכור את ספרך ישירות לקוראים — ללא עמלות, ללא מתווכים.',
+    title: 'סיפור קרוב — מהסופר לשולחן הקריאה | BookToTable',
+    description: 'סיפור קרוב — מכור את ספרך ישירות לקוראים. ללא עמלות, ללא מתווכים.',
     images: ['/logo.png'],
   },
 };
@@ -74,15 +74,17 @@ export default function RootLayout({
               {
                 '@context': 'https://schema.org',
                 '@type': 'Organization',
-                name: 'BookToTable',
+                name: 'סיפור קרוב',
+                alternateName: 'BookToTable',
                 url: 'https://www.booktotable.com',
                 logo: 'https://www.booktotable.com/logo.png',
-                description: 'הפלטפורמה הראשונה בישראל שמאפשרת לסופרים עצמאיים למכור ספרים ישירות לקוראים.',
+                description: 'סיפור קרוב (BookToTable) — הפלטפורמה הראשונה בישראל שמאפשרת לסופרים עצמאיים למכור ספרים ישירות לקוראים. ללא עמלות, ללא מתווכים.',
               },
               {
                 '@context': 'https://schema.org',
                 '@type': 'WebSite',
-                name: 'BookToTable',
+                name: 'סיפור קרוב',
+                alternateName: 'BookToTable',
                 url: 'https://www.booktotable.com',
                 potentialAction: {
                   '@type': 'SearchAction',
