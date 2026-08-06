@@ -1,5 +1,6 @@
 import React from 'react';
 import { Metadata } from 'next';
+import Image from 'next/image';
 import { BookOpen, Heart, Award, ShieldCheck, Users } from 'lucide-react';
 import Link from 'next/link';
 
@@ -24,10 +25,13 @@ export default function AboutPage() {
       {/* Hero Section */}
       <section className="relative py-24 bg-green-900 overflow-hidden">
         <div className="absolute inset-0">
-          <img 
+          <Image 
             src="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?q=80&w=2000&auto=format&fit=crop" 
             alt="Library" 
-            className="w-full h-full object-cover opacity-20"
+            fill
+            className="object-cover opacity-20"
+            priority
+            sizes="100vw"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-green-900 via-green-900/80 to-transparent"></div>
         </div>

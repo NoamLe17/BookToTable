@@ -55,29 +55,55 @@ export default async function BookPage({ params }: BookPageProps) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'Book',
-            name: book.title,
-            author: {
-              '@type': 'Person',
-              name: book.authorName,
+          __html: JSON.stringify([
+            {
+              '@context': 'https://schema.org',
+              '@type': 'Book',
+              name: book.title,
+              author: {
+                '@type': 'Person',
+                name: book.authorName,
+              },
+              offers: {
+                '@type': 'Offer',
+                price: book.price,
+                priceCurrency: 'ILS',
+                availability: 'https://schema.org/InStock',
+                url: `https://www.booktotable.com/books/${book.id}`,
+              },
+              description: book.description,
+              image: book.coverUrl || undefined,
+              inLanguage: 'he',
+              publisher: {
+                '@type': 'Organization',
+                name: 'BookToTable',
+              },
             },
-            offers: {
-              '@type': 'Offer',
-              price: book.price,
-              priceCurrency: 'ILS',
-              availability: 'https://schema.org/InStock',
-              url: `https://www.booktotable.com/books/${book.id}`,
+            {
+              '@context': 'https://schema.org',
+              '@type': 'BreadcrumbList',
+              itemListElement: [
+                {
+                  '@type': 'ListItem',
+                  position: 1,
+                  name: 'ראשי',
+                  item: 'https://www.booktotable.com',
+                },
+                {
+                  '@type': 'ListItem',
+                  position: 2,
+                  name: 'ספרים',
+                  item: 'https://www.booktotable.com/books',
+                },
+                {
+                  '@type': 'ListItem',
+                  position: 3,
+                  name: book.title,
+                  item: `https://www.booktotable.com/books/${book.id}`,
+                },
+              ],
             },
-            description: book.description,
-            image: book.coverUrl || undefined,
-            inLanguage: 'he',
-            publisher: {
-              '@type': 'Organization',
-              name: 'BookToTable',
-            },
-          }),
+          ]),
         }}
       />
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -86,7 +112,7 @@ export default async function BookPage({ params }: BookPageProps) {
         <nav className="flex text-sm text-gray-500 mb-8 font-medium">
           <Link href="/" className="hover:text-green-600 transition-colors">ראשי</Link>
           <span className="mx-2">/</span>
-          <Link href="/#books" className="hover:text-green-600 transition-colors">ספרים</Link>
+          <Link href="/books" className="hover:text-green-600 transition-colors">ספרים</Link>
           <span className="mx-2">/</span>
           <span className="text-gray-900">{book.title}</span>
         </nav>

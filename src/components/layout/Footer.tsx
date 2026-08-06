@@ -61,12 +61,6 @@ export default function Footer() {
               ללא מתווכים, ללא עמלות בשלב ההשקה, עם מינימום בירוקרטיה.
             </p>
             <div className="flex items-center gap-3 mt-6">
-              <a href="#" className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-green-500 hover:text-white transition-all">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
-              </a>
-              <a href="#" className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-green-500 hover:text-white transition-all">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg>
-              </a>
               <button onClick={() => setIsContactOpen(true)} className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-green-500 hover:text-white transition-all">
                 <Mail className="w-4 h-4" />
               </button>
@@ -95,9 +89,9 @@ export default function Footer() {
             <h3 className="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wider">תמיכה</h3>
             <ul className="space-y-3">
               <li>
-                <button onClick={() => setIsFaqOpen(true)} className="text-sm text-gray-600 hover:text-green-600 transition-colors">
+                <Link href="/faq" className="text-sm text-gray-600 hover:text-green-600 transition-colors">
                   שאלות נפוצות
-                </button>
+                </Link>
               </li>
               <li>
                 <button onClick={() => setIsContactOpen(true)} className="text-sm text-gray-600 hover:text-green-600 transition-colors">

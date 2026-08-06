@@ -2,9 +2,20 @@ import React from 'react';
 import Link from 'next/link';
 import { ArrowRight, Info, Monitor, Mail, Heart } from 'lucide-react';
 
-export const metadata = {
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
   title: 'הצהרת נגישות | BookToTable',
-  description: 'הצהרת הנגישות של אתר BookToTable - הפלטפורמה להעצמת סופרים עצמאיים בישראל.',
+  description: 'הצהרת הנגישות של אתר BookToTable — הפלטפורמה להעצמת סופרים עצמאיים בישראל. נגישות לפי תקן WCAG 2.1 ברמת AA.',
+  alternates: {
+    canonical: 'https://www.booktotable.com/accessibility',
+  },
+  openGraph: {
+    title: 'הצהרת נגישות | BookToTable',
+    description: 'הצהרת הנגישות של אתר BookToTable — הפלטפורמה להעצמת סופרים עצמאיים בישראל.',
+    url: 'https://www.booktotable.com/accessibility',
+    type: 'website',
+  },
 };
 
 export default function AccessibilityPage() {

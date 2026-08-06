@@ -2,9 +2,20 @@ import React from 'react';
 import Link from 'next/link';
 import { ArrowRight, ShieldCheck, Scale, Lock, AlertCircle } from 'lucide-react';
 
-export const metadata = {
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
   title: 'תקנון, תנאי שימוש ומדיניות פרטיות | BookToTable',
-  description: 'תקנון האתר, תנאי שימוש ומדיניות פרטיות מחייבת של פלטפורמת BookToTable.',
+  description: 'תקנון האתר, תנאי שימוש ומדיניות פרטיות מחייבת של פלטפורמת BookToTable — הפלטפורמה להעצמת סופרים עצמאיים בישראל.',
+  alternates: {
+    canonical: 'https://www.booktotable.com/legal',
+  },
+  openGraph: {
+    title: 'תקנון, תנאי שימוש ומדיניות פרטיות | BookToTable',
+    description: 'תקנון האתר, תנאי שימוש ומדיניות פרטיות מחייבת של פלטפורמת BookToTable.',
+    url: 'https://www.booktotable.com/legal',
+    type: 'website',
+  },
 };
 
 export default function LegalPage() {
