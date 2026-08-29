@@ -11,7 +11,7 @@ export default function robots(): MetadataRoute.Robots {
         '/dashboard/',
         '/checkout/',
         '/cart/',
-        '/auth/register',
+        '/auth/',
       ],
     },
     sitemap: 'https://www.booktotable.com/sitemap.xml',

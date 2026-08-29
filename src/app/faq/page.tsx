@@ -4,14 +4,14 @@ import Link from 'next/link';
 import { ArrowRight, HelpCircle, BookOpen, CreditCard, Truck, ShieldCheck, Users } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'שאלות נפוצות | BookToTable',
-  description: 'תשובות לשאלות הנפוצות ביותר על BookToTable — איך קונים ספרים, איך התשלום עובד, משלוחים, ועוד. הפלטפורמה הישראלית שמחברת סופרים עצמאיים ישירות לקוראים.',
+  title: 'שאלות נפוצות | סיפור קרוב — Book To Table',
+  description: 'תשובות לשאלות הנפוצות ביותר על סיפור קרוב (Book To Table) — איך קונים ספרים, איך התשלום עובד, משלוחים, ועוד. הפלטפורמה הישראלית שמחברת סופרים עצמאיים ישירות לקוראים.',
   alternates: {
     canonical: 'https://www.booktotable.com/faq',
   },
   openGraph: {
-    title: 'שאלות נפוצות | BookToTable',
-    description: 'תשובות לשאלות הנפוצות ביותר על BookToTable — הפלטפורמה להעצמת סופרים עצמאיים בישראל.',
+    title: 'שאלות נפוצות | סיפור קרוב — Book To Table',
+    description: 'תשובות לשאלות הנפוצות ביותר על Book To Table — הפלטפורמה להעצמת סופרים עצמאיים בישראל.',
     url: 'https://www.booktotable.com/faq',
     type: 'website',
   },

@@ -3,7 +3,7 @@ import Link from 'next/link';
 import BookCarousel from '@/components/marketplace/BookCarousel';
 import { getBooks } from '@/lib/firestore';
 
-export const revalidate = 0;
+export const revalidate = 3600; // Revalidate every hour for SEO
 
 export default async function HomePage() {
   const [booksResult] = await Promise.allSettled([
@@ -35,11 +35,12 @@ export default async function HomePage() {
               <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
             </span>
             <span className="text-sm font-medium text-gray-300 tracking-wide group-hover:text-white transition-colors">
-              פלטפורמת הקריאה החדשה של ישראל
+              סיפור קרוב | Book To Table — פלטפורמת הקריאה החדשה של ישראל
             </span>
           </div>
 
           <h1 className="text-6xl md:text-8xl font-black text-white mb-6 leading-[1.1] tracking-tight">
+            <span className="block text-3xl md:text-4xl font-bold text-green-300 mb-3 tracking-normal">סיפור קרוב | Book To Table</span>
             הבית של <br className="md:hidden" />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-emerald-300 to-green-500 animate-gradient-x">
               הסופרים העצמאיים
