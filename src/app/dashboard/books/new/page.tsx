@@ -62,7 +62,7 @@ export default function AddBookPage() {
       });
 
       // 2. Create Book document in Firestore
-      await createBook({
+      const bookId = await createBook({
         authorId: user.id,
         authorName: user.name,
         title: data.title,
@@ -72,6 +72,14 @@ export default function AddBookPage() {
         coverUrl: coverUrl,
         isPublished: true, // Auto publish for now
       });
+
+      // 3. 🚀 Auto-notify Google to index the new book page immediately
+      const bookUrl = `https://www.booktotable.com/books/${bookId}`;
+      fetch('/api/indexing/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: bookUrl, type: 'URL_UPDATED' }),
+      }).catch(err => console.warn('[Indexing] Notification failed (non-critical):', err));
 
       setSuccess(true);
       setTimeout(() => {

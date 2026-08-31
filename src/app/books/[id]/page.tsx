@@ -5,7 +5,7 @@ import { BookOpen, Truck, ShieldCheck, Heart } from 'lucide-react';
 import Link from 'next/link';
 import AddToCartButton from '@/components/marketplace/AddToCartButton';
 
-export const revalidate = 0;
+export const revalidate = 3600; // Revalidate every hour for SEO
 
 interface BookPageProps {
   params: Promise<{ id: string }>;
