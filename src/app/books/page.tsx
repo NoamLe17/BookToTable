@@ -3,6 +3,9 @@ import { Metadata } from 'next';
 import { getBooks } from '@/lib/firestore';
 import BooksStore from '@/components/marketplace/BooksStore';
 
+// Always fetch fresh — so newly added/deleted books appear immediately
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: 'חנות ספרים | סיפור קרוב — Book To Table',
   description: 'גלו ספרים של סופרים ישראלים עצמאיים בסיפור קרוב (Book To Table). קנו ספרים ישירות מהסופר — בלי עמלות ובלי מתווכים. משלוח עד הבית.',
@@ -17,9 +20,8 @@ export const metadata: Metadata = {
   },
 };
 
-
 export default async function BooksPage() {
-  // Fetch up to 100 books for the store
+  // Fetch only published books, up to 100
   const books = await getBooks(100);
 
   return (

@@ -4,7 +4,7 @@ import React, { useEffect, useState, Suspense } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Book as BookIcon, DollarSign, TrendingUp, Package, Eye, ChevronUp, ChevronDown, X } from 'lucide-react';
 import Link from 'next/link';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Book, Order, User } from '@/types';
 import { updateOrderTracking, getUserById, updateOrderStatus } from '@/lib/firestore';
@@ -43,26 +43,42 @@ function DashboardContent() {
     if (firebaseUser) fetchTargetUser();
   }, [firebaseUser, user, isAdmin, impersonateUid]);
 
+  // Real-time listeners — updates immediately when books/orders change
   useEffect(() => {
-    async function fetchMyBooks() {
-      if (!targetUid) return;
-      try {
-        const qBooks = query(collection(db, 'books'), where('authorId', '==', targetUid));
-        const snapBooks = await getDocs(qBooks);
-        const myBooks = snapBooks.docs.map(d => ({ id: d.id, ...d.data() } as Book));
-        setBooks(myBooks);
+    if (!targetUid) return;
+    setLoading(true);
+    let booksLoaded = false;
+    let ordersLoaded = false;
 
-        const qOrders = query(collection(db, 'orders'), where('authorId', '==', targetUid));
-        const snapOrders = await getDocs(qOrders);
-        const myOrders = snapOrders.docs.map(d => ({ id: d.id, ...d.data() } as Order));
-        setOrders(myOrders);
-      } catch (error) {
-        console.error("Failed to fetch dashboard data:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchMyBooks();
+    const checkLoaded = () => {
+      if (booksLoaded && ordersLoaded) setLoading(false);
+    };
+
+    const qBooks = query(collection(db, 'books'), where('authorId', '==', targetUid));
+    const unsubBooks = onSnapshot(qBooks, (snap) => {
+      const myBooks = snap.docs.map(d => ({ id: d.id, ...d.data() } as Book));
+      setBooks(myBooks);
+      booksLoaded = true;
+      checkLoaded();
+    }, (error) => {
+      console.error('Failed to subscribe to books:', error);
+      booksLoaded = true;
+      checkLoaded();
+    });
+
+    const qOrders = query(collection(db, 'orders'), where('authorId', '==', targetUid));
+    const unsubOrders = onSnapshot(qOrders, (snap) => {
+      const myOrders = snap.docs.map(d => ({ id: d.id, ...d.data() } as Order));
+      setOrders(myOrders);
+      ordersLoaded = true;
+      checkLoaded();
+    }, (error) => {
+      console.error('Failed to subscribe to orders:', error);
+      ordersLoaded = true;
+      checkLoaded();
+    });
+
+    return () => { unsubBooks(); unsubOrders(); };
   }, [targetUid]);
 
   const [trackingInputs, setTrackingInputs] = useState<Record<string, string>>({});
@@ -185,22 +201,22 @@ function DashboardContent() {
         <h1 className="text-3xl font-extrabold text-gray-900 mb-2">שלום, {targetUser?.name} 👋</h1>
         <p className="text-gray-500 font-medium mb-8">ברוך הבא ללוח הבקרה שלך. כאן תוכל לנהל את המכירות והספרים שלך.</p>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+        {/* Stats Grid - 2 cols on mobile, 4 on desktop */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-8 sm:mb-10">
         {stats.map((stat) => (
-          <div key={stat.name} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center text-green-600">
-                <stat.icon size={24} />
+          <div key={stat.name} className="bg-white p-4 sm:p-6 rounded-2xl border border-gray-100 shadow-sm">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <div className="w-9 h-9 sm:w-12 sm:h-12 bg-green-50 rounded-xl flex items-center justify-center text-green-600">
+                <stat.icon size={18} />
               </div>
               {stat.trend && (
-                <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full">
+                <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
                   {stat.trend}
                 </span>
               )}
             </div>
-            <p className="text-sm font-medium text-gray-500 mb-1">{stat.name}</p>
-            <p className="text-3xl font-black text-gray-900">{stat.value}</p>
+            <p className="text-xs sm:text-sm font-medium text-gray-500 mb-0.5 sm:mb-1">{stat.name}</p>
+            <p className="text-xl sm:text-3xl font-black text-gray-900">{stat.value}</p>
           </div>
         ))}
       </div>

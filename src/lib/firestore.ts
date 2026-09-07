@@ -13,6 +13,10 @@ import {
   Timestamp,
   setDoc,
   increment,
+  onSnapshot,
+  QuerySnapshot,
+  DocumentData,
+  serverTimestamp,
 } from 'firebase/firestore';
 import { db } from './firebase';
 import { Book, Order, User, FanMail } from '@/types';
@@ -40,6 +44,14 @@ export async function createUser(userId: string, data: Partial<User>): Promise<v
     allowsFanMail: false,
     createdAt: Timestamp.now(),
   });
+  // Notify admin
+  await createAdminNotification({
+    type: 'new_user',
+    title: 'משתמש חדש נרשם',
+    message: `${data.name || data.email || 'משתמש'} הצטרף לפלטפורמה`,
+    entityId: userId,
+    entityType: 'user',
+  });
 }
 
 export async function updateUser(userId: string, data: Partial<User>): Promise<void> {
@@ -49,21 +61,37 @@ export async function updateUser(userId: string, data: Partial<User>): Promise<v
 // ==================== BOOKS ====================
 export async function getBooks(limitCount = 20): Promise<Book[]> {
   try {
+    // Query only published books directly in Firestore (no in-memory filtering)
     const q = query(
       collection(db, 'books'),
+      where('isPublished', '==', true),
       orderBy('createdAt', 'desc'),
-      limit(limitCount * 2) // Fetch a bit more in case we need to filter
+      limit(limitCount)
     );
     const snap = await getDocs(q);
-    const allBooks = snap.docs.map(d => {
+    return snap.docs.map(d => {
       const data = d.data();
       return { id: d.id, ...data, createdAt: data.createdAt?.toMillis() || Date.now() } as Book;
     });
-    // Filter in memory to avoid needing a composite index in Firestore
-    return allBooks.filter(b => b.isPublished).slice(0, limitCount);
   } catch (error) {
     console.error('Error fetching getBooks:', error);
-    return [];
+    // Fallback: fetch all and filter (handles missing Firestore index)
+    try {
+      const q2 = query(
+        collection(db, 'books'),
+        orderBy('createdAt', 'desc'),
+        limit(limitCount * 3)
+      );
+      const snap2 = await getDocs(q2);
+      const all = snap2.docs.map(d => {
+        const data = d.data();
+        return { id: d.id, ...data, createdAt: data.createdAt?.toMillis() || Date.now() } as Book;
+      });
+      return all.filter(b => b.isPublished).slice(0, limitCount);
+    } catch (err2) {
+      console.error('Fallback getBooks also failed:', err2);
+      return [];
+    }
   }
 }
 
@@ -71,15 +99,15 @@ export async function getBestsellers(limitCount = 8): Promise<Book[]> {
   try {
     const q = query(
       collection(db, 'books'),
+      where('isPublished', '==', true),
       orderBy('salesCount', 'desc'),
-      limit(limitCount * 2)
+      limit(limitCount)
     );
     const snap = await getDocs(q);
-    const allBooks = snap.docs.map(d => {
+    return snap.docs.map(d => {
       const data = d.data();
       return { id: d.id, ...data, createdAt: data.createdAt?.toMillis() || Date.now() } as Book;
     });
-    return allBooks.filter(b => b.isPublished).slice(0, limitCount);
   } catch (error) {
     console.error('Error fetching getBestsellers:', error);
     return [];
@@ -115,6 +143,14 @@ export async function createBook(data: Omit<Book, 'id' | 'createdAt' | 'salesCou
     salesCount: 0,
     createdAt: Timestamp.now(),
   });
+  // Notify admin
+  await createAdminNotification({
+    type: 'new_book',
+    title: 'ספר חדש הועלה',
+    message: `"${data.title}" מאת ${data.authorName || 'סופר'} — עלה לאוויר`,
+    entityId: docRef.id,
+    entityType: 'book',
+  });
   return docRef.id;
 }
 
@@ -143,6 +179,15 @@ export async function createOrder(data: Omit<Order, 'id' | 'createdAt'>): Promis
       console.error('Failed to increment sales count:', e);
     }
   }
+
+  // Notify admin
+  await createAdminNotification({
+    type: 'new_order',
+    title: 'הזמנה חדשה התקבלה',
+    message: `הזמנה עבור "${data.bookTitle || data.bookId}" על סך ₪${data.totalPaid}`,
+    entityId: docRef.id,
+    entityType: 'order',
+  });
 
   return docRef.id;
 }
@@ -220,4 +265,61 @@ export async function getTrendingAuthors(limitCount = 6): Promise<User[]> {
     console.error('Error fetching getTrendingAuthors:', error);
     return [];
   }
+}
+
+// ==================== ADMIN NOTIFICATIONS ====================
+export interface AdminNotification {
+  id: string;
+  type: 'new_user' | 'new_book' | 'new_order' | 'book_deleted' | 'user_deleted';
+  title: string;
+  message: string;
+  entityId: string;
+  entityType: 'user' | 'book' | 'order';
+  read: boolean;
+  createdAt: number;
+}
+
+export async function createAdminNotification(data: Omit<AdminNotification, 'id' | 'read' | 'createdAt'>): Promise<void> {
+  try {
+    await addDoc(collection(db, 'admin_notifications'), {
+      ...data,
+      read: false,
+      createdAt: Timestamp.now(),
+    });
+  } catch (error) {
+    // Non-critical — don't block the main flow
+    console.warn('Could not create admin notification:', error);
+  }
+}
+
+export async function markNotificationRead(notificationId: string): Promise<void> {
+  await updateDoc(doc(db, 'admin_notifications', notificationId), { read: true });
+}
+
+export async function markAllNotificationsRead(): Promise<void> {
+  const q = query(collection(db, 'admin_notifications'), where('read', '==', false));
+  const snap = await getDocs(q);
+  const updates = snap.docs.map(d => updateDoc(d.ref, { read: true }));
+  await Promise.all(updates);
+}
+
+export function subscribeToNotifications(
+  callback: (notifications: AdminNotification[]) => void
+): () => void {
+  const q = query(
+    collection(db, 'admin_notifications'),
+    orderBy('createdAt', 'desc'),
+    limit(100)
+  );
+  return onSnapshot(q, (snap: QuerySnapshot<DocumentData>) => {
+    const notifs = snap.docs.map(d => {
+      const data = d.data();
+      return {
+        id: d.id,
+        ...data,
+        createdAt: data.createdAt?.toMillis() || Date.now(),
+      } as AdminNotification;
+    });
+    callback(notifs);
+  });
 }
