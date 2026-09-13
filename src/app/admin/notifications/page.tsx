@@ -1,12 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import {
-  subscribeToNotifications,
-  markNotificationRead,
-  markAllNotificationsRead,
-  AdminNotification,
-} from '@/lib/firestore';
+import { db } from '@/lib/firebase';
+import { collection, query, where, onSnapshot, orderBy, limit, getDocs } from 'firebase/firestore';
+import { updateDoc, doc } from 'firebase/firestore';
 import {
   Bell,
   BellOff,
@@ -18,8 +15,20 @@ import {
   Check,
   Clock,
   ExternalLink,
+  AlertCircle,
 } from 'lucide-react';
 import Link from 'next/link';
+
+interface AdminNotification {
+  id: string;
+  type: 'new_user' | 'new_book' | 'new_order' | 'book_deleted' | 'user_deleted';
+  title: string;
+  message: string;
+  entityId: string;
+  entityType: 'user' | 'book' | 'order';
+  read: boolean;
+  createdAt: number;
+}
 
 const TYPE_META: Record<AdminNotification['type'], {
   icon: React.ElementType;
@@ -35,9 +44,9 @@ const TYPE_META: Record<AdminNotification['type'], {
 };
 
 const ENTITY_LINK: Record<AdminNotification['entityType'], (id: string) => string> = {
-  user: (id) => `/admin?user=${id}`,
+  user: (id) => `/admin`,
   book: (id) => `/books/${id}`,
-  order: (id) => `/admin?order=${id}`,
+  order: (id) => `/admin`,
 };
 
 function timeAgo(ms: number): string {
@@ -55,15 +64,40 @@ export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<AdminNotification[]>([]);
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [markingAll, setMarkingAll] = useState(false);
 
   useEffect(() => {
-    const unsub = subscribeToNotifications((notifs) => {
+    // Use a simple collection snapshot without orderBy to avoid needing a composite index.
+    // We sort the results in memory instead.
+    const q = query(
+      collection(db, 'admin_notifications'),
+      limit(200)
+    );
+
+    const unsub = onSnapshot(q, (snap) => {
+      const notifs: AdminNotification[] = snap.docs.map(d => {
+        const data = d.data();
+        return {
+          id: d.id,
+          ...data,
+          createdAt: data.createdAt?.toMillis?.() || data.createdAt || Date.now(),
+        } as AdminNotification;
+      });
+      // Sort descending by createdAt in memory
+      notifs.sort((a, b) => b.createdAt - a.createdAt);
       setNotifications(notifs);
       setLoading(false);
+      setError(null);
+    }, (err) => {
+      console.error('Notifications snapshot error:', err);
+      setError('שגיאה בטעינת ההתראות: ' + err.message);
+      setLoading(false);
     });
+
     return unsub;
   }, []);
+
 
   const filtered = filter === 'unread'
     ? notifications.filter(n => !n.read)
@@ -73,12 +107,18 @@ export default function NotificationsPage() {
 
   const handleMarkAllRead = async () => {
     setMarkingAll(true);
-    await markAllNotificationsRead();
-    setMarkingAll(false);
+    try {
+      const unread = notifications.filter(n => !n.read);
+      await Promise.all(unread.map(n => updateDoc(doc(db, 'admin_notifications', n.id), { read: true })));
+    } catch (e) {
+      console.error('markAllRead error:', e);
+    } finally {
+      setMarkingAll(false);
+    }
   };
 
   const handleMarkRead = async (id: string) => {
-    await markNotificationRead(id);
+    await updateDoc(doc(db, 'admin_notifications', id), { read: true });
   };
 
   if (loading) {
@@ -91,6 +131,20 @@ export default function NotificationsPage() {
       </div>
     );
   }
+
+  if (error) {
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-2xl p-6 text-center max-w-lg mx-auto mt-8">
+        <AlertCircle size={32} className="mx-auto text-red-500 mb-3" />
+        <h3 className="text-lg font-bold text-red-700 mb-1">שגיאה בטעינת ההתראות</h3>
+        <p className="text-red-600 text-sm">{error}</p>
+        <p className="text-gray-500 text-xs mt-3">
+          ייתכן שה-collection עדיין ריק. התראות ייווצרו אוטומטית כשיצטרפו משתמשים חדשים, יועלו ספרים, או יתקבלו הזמנות.
+        </p>
+      </div>
+    );
+  }
+
 
   return (
     <div className="space-y-6">
