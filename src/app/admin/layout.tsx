@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter, usePathname } from 'next/navigation';
-import { Loader2, Bell, LayoutDashboard, Send } from 'lucide-react';
+import { Loader2, Bell, LayoutDashboard, Send, BarChart2, Package } from 'lucide-react';
 import Link from 'next/link';
 import { db } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, orderBy, limit } from 'firebase/firestore';
@@ -55,9 +55,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   const navItems = [
-    { href: '/admin', label: 'סקירה', icon: LayoutDashboard, badge: 0 },
-    { href: '/admin/notifications', label: 'התראות', icon: Bell, badge: unreadCount },
-    { href: '/admin/broadcast', label: 'שלח מייל', icon: Send, badge: 0 },
+    { href: '/admin',           label: 'סקירה',    icon: LayoutDashboard, badge: 0 },
+    { href: '/admin/analytics', label: 'אנליטיקס', icon: BarChart2,        badge: 0 },
+    { href: '/admin/orders',    label: 'הזמנות',   icon: Package,          badge: 0 },
+    { href: '/admin/notifications', label: 'התראות', icon: Bell,           badge: unreadCount },
+    { href: '/admin/broadcast', label: 'שלח מייל', icon: Send,             badge: 0 },
   ];
 
   return (

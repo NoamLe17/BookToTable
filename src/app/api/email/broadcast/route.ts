@@ -79,16 +79,27 @@ ${message}
           subject,
           html: htmlTemplate(recipient.name),
         });
+        if (error) {
+          console.error(`[Broadcast] Failed to send to ${recipient.email}:`, error);
+        }
         results.push({ email: recipient.email, success: !error, error: error?.message });
         // Small delay to avoid rate limits
-        await new Promise(r => setTimeout(r, 100));
+        await new Promise(r => setTimeout(r, 300));
       } catch (err: any) {
+        console.error(`[Broadcast] Exception sending to ${recipient.email}:`, err.message);
         results.push({ email: recipient.email, success: false, error: err.message });
       }
     }
 
     const succeeded = results.filter(r => r.success).length;
     const failed = results.filter(r => !r.success).length;
+    const failureReasons = results
+      .filter(r => !r.success)
+      .map(r => `${r.email}: ${r.error || 'Unknown error'}`);
+
+    if (failureReasons.length > 0) {
+      console.error('[Broadcast] Failures:', failureReasons);
+    }
 
     return NextResponse.json({
       success: true,
@@ -96,6 +107,7 @@ ${message}
       succeeded,
       failed,
       results,
+      failureReasons,
     });
   } catch (err: any) {
     console.error('Broadcast Email Error:', err);

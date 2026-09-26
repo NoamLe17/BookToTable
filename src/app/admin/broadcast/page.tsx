@@ -26,7 +26,7 @@ export default function BroadcastPage() {
   const [sendToAll, setSendToAll] = useState(true);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [sending, setSending] = useState(false);
-  const [result, setResult] = useState<{ succeeded: number; failed: number; total: number } | null>(null);
+  const [result, setResult] = useState<{ succeeded: number; failed: number; total: number; failureReasons?: string[] } | null>(null);
   const [showUserList, setShowUserList] = useState(false);
 
   useEffect(() => {
@@ -83,7 +83,7 @@ export default function BroadcastPage() {
       if (!res.ok) {
         toast.error('שגיאה: ' + (data.error || 'Unknown error'));
       } else {
-        setResult({ succeeded: data.succeeded, failed: data.failed, total: data.total });
+        setResult({ succeeded: data.succeeded, failed: data.failed, total: data.total, failureReasons: data.failureReasons });
         toast.success(`נשלח בהצלחה ל-${data.succeeded} מתוך ${data.total} נמענים`);
         if (data.succeeded === data.total) {
           setSubject('');
@@ -119,12 +119,22 @@ export default function BroadcastPage() {
           ) : (
             <AlertCircle size={20} className="text-yellow-600 shrink-0 mt-0.5" />
           )}
-          <div>
+          <div className="flex-1">
             <p className="font-bold text-sm">
               {result.failed === 0
                 ? `✅ כל ${result.total} המיילים נשלחו בהצלחה!`
                 : `⚠️ נשלח ל-${result.succeeded} מתוך ${result.total}. ${result.failed} נכשלו.`}
             </p>
+            {result.failureReasons && result.failureReasons.length > 0 && (
+              <details className="mt-2">
+                <summary className="text-xs text-yellow-700 cursor-pointer hover:underline">הצג סיבות כישלון ({result.failureReasons.length})</summary>
+                <ul className="mt-1 space-y-0.5">
+                  {result.failureReasons.map((reason, i) => (
+                    <li key={i} className="text-xs text-yellow-800 font-mono bg-yellow-100 rounded px-2 py-0.5 break-all">{reason}</li>
+                  ))}
+                </ul>
+              </details>
+            )}
           </div>
         </div>
       )}
