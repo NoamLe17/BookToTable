@@ -73,10 +73,12 @@ export default function AdminDashboard() {
 
   const handleDeleteUser = async (uid: string, name: string) => {
     if (!confirm(`האם למחוק לצמיתות את המשתמש "${name}"? פעולה זו בלתי הפיכה!`)) return;
-    if (!firebaseUser?.email) return;
+    if (!firebaseUser) return;
     try {
       const toastId = toast.loading('מוחק משתמש...');
-      const res = await deleteUserAction(uid, firebaseUser.email);
+      // ✅ Pass ID token (not email) for real server-side verification
+      const idToken = await firebaseUser.getIdToken();
+      const res = await deleteUserAction(uid, idToken);
       if (res.success) {
         await createAdminNotification({
           type: 'user_deleted',

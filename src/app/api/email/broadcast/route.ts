@@ -1,19 +1,33 @@
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
-import { adminDb } from '@/lib/firebase-admin';
+import { adminAuth, adminDb } from '@/lib/firebase-admin';
+import type { QueryDocumentSnapshot } from 'firebase-admin/firestore';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const ADMIN_EMAIL = 'noamhemo2001@gmail.com';
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const { subject, message, targetUserIds, adminEmail } = body;
-
-    // Simple admin check
-    if (adminEmail !== ADMIN_EMAIL) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    // ✅ Secure: Verify Firebase ID Token from Authorization header
+    const authHeader = request.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+    const idToken = authHeader.replace('Bearer ', '');
+
+    let decodedToken;
+    try {
+      decodedToken = await adminAuth.verifyIdToken(idToken);
+    } catch {
+      return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
+    }
+
+    if (decodedToken.email !== ADMIN_EMAIL) {
+      return NextResponse.json({ error: 'Forbidden: admin only' }, { status: 403 });
+    }
+
+    const body = await request.json();
+    const { subject, message, targetUserIds } = body;
 
     if (!subject || !message) {
       return NextResponse.json({ error: 'Missing subject or message' }, { status: 400 });
@@ -36,7 +50,7 @@ export async function POST(request: Request) {
     } else {
       // Send to ALL users
       const snap = await adminDb.collection('users').get();
-      snap.forEach(doc => {
+      snap.forEach((doc: QueryDocumentSnapshot) => {
         const data = doc.data();
         if (data.email) emails.push({ id: doc.id, email: data.email, name: data.name || data.email });
       });

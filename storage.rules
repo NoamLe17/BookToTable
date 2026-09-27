@@ -1,32 +1,40 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
-    
+
     // Helper function to check if the user is the Super Admin
     function isAdmin() {
       return request.auth != null && request.auth.token.email == 'noamhemo2001@gmail.com';
     }
 
-    // Helper function to check if the user is authenticated
-    function isAuthenticated() {
-      return request.auth != null;
-    }
-
     // Helper function to check if the uploaded file is an image and under 5MB
     function isValidImage() {
-      return request.resource.contentType.matches('image/.*') 
+      return request.resource.contentType.matches('image/.*')
              && request.resource.size < 5 * 1024 * 1024;
     }
 
-    // Books covers (Avatars/Covers)
+    // Admin has full access to everything
     match /{allPaths=**} {
-      // Admin bypass
       allow read, write, delete: if isAdmin();
-      
-      // Anyone can read images
+    }
+
+    // Anyone can read book covers and avatars (public images)
+    match /books/{userId}/{fileName} {
       allow read: if true;
-      // Only authenticated authors can upload valid images
-      allow write: if isAuthenticated() && isValidImage();
+      // ✅ Authors can only write to their own folder — prevents cross-author overwrites
+      allow write: if request.auth != null
+        && request.auth.uid == userId
+        && isValidImage();
+      allow delete: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Avatar images — scoped to user UID
+    match /avatars/{userId}/{fileName} {
+      allow read: if true;
+      allow write: if request.auth != null
+        && request.auth.uid == userId
+        && isValidImage();
+      allow delete: if request.auth != null && request.auth.uid == userId;
     }
   }
 }

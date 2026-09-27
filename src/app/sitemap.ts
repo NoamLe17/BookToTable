@@ -1,4 +1,5 @@
 import { MetadataRoute } from 'next';
+import type { QueryDocumentSnapshot } from 'firebase-admin/firestore';
 
 // Fetch published books for sitemap using Firebase Admin SDK
 async function getPublishedBookIds(): Promise<{ id: string; updatedAt: Date }[]> {
@@ -10,9 +11,9 @@ async function getPublishedBookIds(): Promise<{ id: string; updatedAt: Date }[]>
       .where('isPublished', '==', true)
       .get();
 
-    return snap.docs.map((doc) => ({
+    return snap.docs.map((doc: QueryDocumentSnapshot) => ({
       id: doc.id,
-      updatedAt: doc.updateTime?.toDate() || new Date(),
+      updatedAt: (doc as any).updateTime?.toDate() || new Date(),
     }));
   } catch (error) {
     console.error('Sitemap: Failed to fetch books from Firestore:', error);

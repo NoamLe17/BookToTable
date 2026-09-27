@@ -12,6 +12,7 @@
 
 import { NextResponse } from 'next/server';
 import { notifyGoogleIndexingBatch, pingSitemapToSearchEngines } from '@/lib/google-indexing';
+import type { QueryDocumentSnapshot } from 'firebase-admin/firestore';
 
 const STATIC_URLS = [
   'https://www.booktotable.com',
@@ -38,7 +39,7 @@ export async function POST(request: Request) {
       .get();
 
     const bookUrls = snap.docs.map(
-      doc => `https://www.booktotable.com/books/${doc.id}`
+      (doc: QueryDocumentSnapshot) => `https://www.booktotable.com/books/${doc.id}`
     );
 
     const allUrls = [...STATIC_URLS, ...bookUrls];

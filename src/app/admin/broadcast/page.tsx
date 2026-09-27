@@ -58,7 +58,7 @@ export default function BroadcastPage() {
     if (!subject.trim()) { toast.error('נא להזין נושא'); return; }
     if (!message.trim()) { toast.error('נא להזין תוכן ההודעה'); return; }
     if (!sendToAll && selectedIds.size === 0) { toast.error('נא לבחור לפחות משתמש אחד'); return; }
-    if (!firebaseUser?.email) return;
+    if (!firebaseUser) return;
 
     const recipientCount = sendToAll ? users.length : selectedIds.size;
     const confirm = window.confirm(
@@ -69,14 +69,18 @@ export default function BroadcastPage() {
     setSending(true);
     setResult(null);
     try {
+      // ✅ Get fresh Firebase ID token and send in Authorization header
+      const idToken = await firebaseUser.getIdToken();
       const res = await fetch('/api/email/broadcast', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`,
+        },
         body: JSON.stringify({
           subject,
           message,
           targetUserIds: sendToAll ? [] : Array.from(selectedIds),
-          adminEmail: firebaseUser.email,
         }),
       });
       const data = await res.json();

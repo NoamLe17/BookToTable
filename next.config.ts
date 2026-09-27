@@ -13,10 +13,27 @@ const nextConfig: NextConfig = {
         hostname: 'images.unsplash.com',
         pathname: '/**',
       },
+      {
+        // Google user profile pictures (for Google Sign-In)
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+        pathname: '/**',
+      },
     ],
   },
   async headers() {
     return [
+      // ── Apply HSTS to the entire site (force HTTPS) ──────────────────────
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=63072000; includeSubDomains; preload',
+          },
+        ],
+      },
+      // ── Noindex sensitive sections ────────────────────────────────────────
       {
         source: '/dashboard/:path*',
         headers: [
@@ -42,9 +59,17 @@ const nextConfig: NextConfig = {
         ],
       },
       {
-        source: '/auth/register',
+        source: '/auth/:path*',
         headers: [
           { key: 'X-Robots-Tag', value: 'noindex, nofollow' },
+        ],
+      },
+      // ── Block API routes from being indexed ───────────────────────────────
+      {
+        source: '/api/:path*',
+        headers: [
+          { key: 'X-Robots-Tag', value: 'noindex, nofollow' },
+          { key: 'Cache-Control', value: 'no-store, no-cache' },
         ],
       },
     ];

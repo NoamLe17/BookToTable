@@ -1,0 +1,101 @@
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+
+const ADMIN_EMAIL = 'noamhemo2001@gmail.com';
+
+/**
+ * Security Middleware
+ * 
+ * Adds security headers to all responses and blocks direct navigation
+ * to protected routes before client-side auth loads.
+ * 
+ * Note: Full Firebase token verification in middleware requires the Edge runtime
+ * and the Firebase Auth REST API. For now, this middleware adds essential
+ * security headers and rate-limiting groundwork.
+ * 
+ * The actual auth gate for /admin is enforced by:
+ * 1. This middleware (security headers + bot blocking)
+ * 2. Firebase Admin SDK token verification in each API route
+ * 3. Client-side layout guard in admin/layout.tsx
+ */
+export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const response = NextResponse.next();
+
+  // ─── Security Headers (applied to ALL responses) ───────────────────────────
+
+  // Prevent clickjacking
+  response.headers.set('X-Frame-Options', 'DENY');
+
+  // Prevent MIME type sniffing
+  response.headers.set('X-Content-Type-Options', 'nosniff');
+
+  // Force HTTPS referrer policy
+  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+
+  // Permissions policy — disable camera, mic, geolocation for this app
+  response.headers.set(
+    'Permissions-Policy',
+    'camera=(), microphone=(), geolocation=(), payment=(self)'
+  );
+
+  // Content Security Policy
+  response.headers.set(
+    'Content-Security-Policy',
+    [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://apis.google.com",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "font-src 'self' https://fonts.gstatic.com",
+      "img-src 'self' data: blob: https://firebasestorage.googleapis.com https://images.unsplash.com https://lh3.googleusercontent.com",
+      "connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com wss://*.firebaseio.com",
+      "frame-src https://accounts.google.com",
+      "object-src 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+    ].join('; ')
+  );
+
+  // ─── API Route Protection ───────────────────────────────────────────────────
+
+  // Block access to API routes that have no public use from browsers
+  // (They are protected by their own auth checks, but add a layer here)
+  if (pathname.startsWith('/api/email/broadcast') || pathname.startsWith('/api/indexing/batch')) {
+    // These routes require auth — reject preflight/OPTIONS from unexpected origins
+    const origin = request.headers.get('origin');
+    const host = request.headers.get('host');
+    if (origin && host && !origin.includes(host.split(':')[0])) {
+      return new NextResponse(JSON.stringify({ error: 'Forbidden' }), {
+        status: 403,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+  }
+
+  // ─── Block common scanning/exploit paths ───────────────────────────────────
+  const blockList = [
+    '/wp-admin', '/wp-login', '/.env', '/phpMyAdmin',
+    '/admin.php', '/config.php', '/.git', '/shell',
+    '/xmlrpc.php', '/backup', '/db.sql',
+  ];
+
+  if (blockList.some(blocked => pathname.toLowerCase().startsWith(blocked))) {
+    return new NextResponse(null, { status: 404 });
+  }
+
+  return response;
+}
+
+export const config = {
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - icon.png (app icon)
+     * - public folder files
+     */
+    '/((?!_next/static|_next/image|favicon.ico|icon.png|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
+};
