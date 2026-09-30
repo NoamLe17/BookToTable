@@ -1,11 +1,14 @@
 'use server';
 
-import { adminAuth, adminDb } from '@/lib/firebase-admin';
+import { getAdminAuth, getAdminDb } from '@/lib/firebase-admin';
 
 const ADMIN_EMAIL = 'noamhemo2001@gmail.com';
 
 export async function deleteUserAction(uid: string, idToken: string) {
   try {
+    const adminAuth = getAdminAuth();
+    const adminDb = getAdminDb();
+    
     // ✅ Verify the caller's Firebase ID token server-side
     let decodedToken;
     try {

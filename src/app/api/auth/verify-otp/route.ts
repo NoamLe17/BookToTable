@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { adminDb, adminAuth } from '@/lib/firebase-admin';
+import { getAdminDb, getAdminAuth } from '@/lib/firebase-admin';
 
 export async function POST(request: Request) {
   try {
@@ -8,6 +8,9 @@ export async function POST(request: Request) {
     if (!uid || !code) {
       return NextResponse.json({ error: 'חסרים נתונים' }, { status: 400 });
     }
+
+    const adminDb = getAdminDb();
+    const adminAuth = getAdminAuth();
 
     const otpDocRef = adminDb.collection('otps').doc(uid);
     const otpDoc = await otpDocRef.get();

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { adminDb } from '@/lib/firebase-admin';
+import { getAdminDb } from '@/lib/firebase-admin';
 import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -17,6 +17,7 @@ export async function POST(request: Request) {
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes from now
 
     // Save to Firestore
+    const adminDb = getAdminDb();
     await adminDb.collection('otps').doc(uid).set({
       code: otp,
       expiresAt: expiresAt.toISOString(),

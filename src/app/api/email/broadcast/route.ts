@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
-import { adminAuth, adminDb } from '@/lib/firebase-admin';
+import { getAdminAuth, getAdminDb } from '@/lib/firebase-admin';
 import type { QueryDocumentSnapshot } from 'firebase-admin/firestore';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -8,6 +8,9 @@ const ADMIN_EMAIL = 'noamhemo2001@gmail.com';
 
 export async function POST(request: Request) {
   try {
+    const adminAuth = getAdminAuth();
+    const adminDb = getAdminDb();
+    
     // ✅ Secure: Verify Firebase ID Token from Authorization header
     const authHeader = request.headers.get('Authorization');
     if (!authHeader?.startsWith('Bearer ')) {
