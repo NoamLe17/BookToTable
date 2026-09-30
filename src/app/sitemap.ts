@@ -4,7 +4,8 @@ import type { QueryDocumentSnapshot } from 'firebase-admin/firestore';
 // Fetch published books for sitemap using Firebase Admin SDK
 async function getPublishedBookIds(): Promise<{ id: string; updatedAt: Date }[]> {
   try {
-    const { adminDb } = await import('@/lib/firebase-admin');
+    const { getAdminDb } = await import('@/lib/firebase-admin');
+    const adminDb = getAdminDb();
 
     const snap = await adminDb
       .collection('books')

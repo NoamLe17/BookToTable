@@ -32,7 +32,8 @@ export async function POST(request: Request) {
 
   try {
     // Fetch all published book IDs from Firestore
-    const { adminDb } = await import('@/lib/firebase-admin');
+    const { getAdminDb } = await import('@/lib/firebase-admin');
+    const adminDb = getAdminDb();
     const snap = await adminDb
       .collection('books')
       .where('isPublished', '==', true)
