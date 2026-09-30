@@ -57,11 +57,20 @@ export function useAuth() {
         email,
         allowsFanMail,
         stripeOnboarded: false,
+        emailVerified: false,
         ...(pickupAddress && { pickupAddress }),
         ...(paymentMethods && { paymentMethods })
       });
       const userData = await getUserById(cred.user.uid);
       setUser(userData);
+      
+      // Trigger OTP generation and email send
+      await fetch('/api/auth/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, name, uid: cred.user.uid })
+      });
+      
       return cred;
     } catch (error: any) {
       if (error.code === 'auth/api-key-not-valid') {

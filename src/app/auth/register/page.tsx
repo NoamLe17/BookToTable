@@ -85,7 +85,7 @@ export default function AuthorRegisterPage() {
       }, paymentMethods);
       setSuccess(true);
       setTimeout(() => {
-        router.push('/dashboard');
+        router.push('/auth/verify');
       }, 2000);
     } catch (error) {
       console.error('Registration failed:', error);
@@ -103,7 +103,7 @@ export default function AuthorRegisterPage() {
             <CheckCircle2 size={32} className="text-green-600" />
           </div>
           <h2 className="text-3xl font-extrabold text-gray-900 mb-2">ברוכים הבאים ל-BookToTable!</h2>
-          <p className="text-gray-600">החשבון נוצר בהצלחה. מעביר אותך ללוח הבקרה...</p>
+          <p className="text-gray-600">החשבון נוצר בהצלחה. מעביר אותך לאימות כתובת המייל...</p>
         </div>
       </div>
     );
