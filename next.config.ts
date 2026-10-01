@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ['firebase-admin', '@google-cloud/firestore', 'jwks-rsa', 'jose'],
+  // Let Next.js bundle firebase-admin natively to fix ESM resolution for jwks-rsa/jose
   images: {
     remotePatterns: [
       {
