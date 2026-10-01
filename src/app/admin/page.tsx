@@ -6,7 +6,6 @@ import {
   collection, onSnapshot, query, doc, deleteDoc, orderBy,
 } from 'firebase/firestore';
 import { ref, deleteObject } from 'firebase/storage';
-import { deleteUserAction } from '@/app/actions/admin';
 import { createAdminNotification } from '@/lib/firestore';
 import {
   Users, BookOpen, ShoppingBag, Trash2, Eye,
@@ -76,9 +75,17 @@ export default function AdminDashboard() {
     if (!firebaseUser) return;
     try {
       const toastId = toast.loading('מוחק משתמש...');
-      // ✅ Pass ID token (not email) for real server-side verification
+      // Pass ID token (not email) for real server-side verification
       const idToken = await firebaseUser.getIdToken();
-      const res = await deleteUserAction(uid, idToken);
+      
+      const response = await fetch('/api/admin/delete-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ uid, idToken })
+      });
+      
+      const res = await response.json();
+      
       if (res.success) {
         await createAdminNotification({
           type: 'user_deleted',
