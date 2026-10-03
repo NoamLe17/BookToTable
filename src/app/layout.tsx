@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     'סיפור קרוב (Book To Table) — הפלטפורמה הראשונה בישראל לספרים ישירות מהסופר לקורא. ללא עמלות, ללא מתווכים. הסופר מרוויח 100% מכל מכירה.',
   keywords: 'סיפור קרוב, Book To Table, BookToTable, ספרים ישירות מהסופר, סופרים עצמאיים ישראל, פלטפורמת ספרים, מכירת ספרים, ספרים ישראלים, קניית ספרים ישראל, ספרים בלי מתווכים, מהסופר לשולחן הקריאה, חנות ספרים ישראל',
   verification: {
-    google: 'google08a49ad78361bdba',
+    google: 'aibsjFl77s9AR4CvHaOKM-R-m5L1C5K4ci22m1SdLfs',
   },
   alternates: {
     canonical: 'https://www.booktotable.com',
