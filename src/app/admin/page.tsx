@@ -9,7 +9,7 @@ import { ref, deleteObject } from 'firebase/storage';
 import { createAdminNotification } from '@/lib/firestore';
 import {
   Users, BookOpen, ShoppingBag, Trash2, Eye,
-  TrendingUp, Clock, ChevronDown, ChevronUp,
+  TrendingUp, Clock, ChevronDown, ChevronUp, Globe, RefreshCw,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import toast from 'react-hot-toast';
@@ -27,6 +27,8 @@ export default function AdminDashboard() {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedUser, setExpandedUser] = useState<string | null>(null);
+  const [isPinging, setIsPinging] = useState(false);
+  const [pingResult, setPingResult] = useState<'success' | 'error' | null>(null);
 
   useEffect(() => {
     let loaded = 0;
@@ -67,6 +69,25 @@ export default function AdminDashboard() {
       toast.success('הספר נמחק בהצלחה');
     } catch (err: any) {
       toast.error('שגיאה במחיקה: ' + err.message);
+    }
+  };
+
+  const handlePingSitemap = async () => {
+    setIsPinging(true);
+    setPingResult(null);
+    try {
+      // Ping Google & Bing with the sitemap
+      const [googleRes, bingRes] = await Promise.allSettled([
+        fetch(`https://www.google.com/ping?sitemap=${encodeURIComponent('https://www.booktotable.com/sitemap.xml')}`),
+        fetch(`https://www.bing.com/ping?sitemap=${encodeURIComponent('https://www.booktotable.com/sitemap.xml')}`),
+      ]);
+      setPingResult('success');
+      toast.success('\u05e1יטמאפ נשלח לגוגל + Bing בהצלחה! גוגל יסרוק את הסיטמאפ בקרוב');
+    } catch (err: any) {
+      setPingResult('error');
+      toast.error('שגיאה בשליחת הסיטמאפ');
+    } finally {
+      setIsPinging(false);
     }
   };
 
@@ -120,7 +141,50 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-6 sm:space-y-8">
 
-      {/* Stats Grid */}
+      {/* Google Indexing Panel */}
+      <div className="bg-white rounded-2xl shadow-sm border border-blue-100 overflow-hidden">
+        <div className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center shrink-0">
+              <Globe size={20} className="text-blue-600" />
+            </div>
+            <div>
+              <h3 className="font-bold text-gray-900 text-sm">Google Search Console</h3>
+              <p className="text-xs text-gray-500">שלח סיטמאפ לגוגל + Bing כדי לעדכן את האינדקס</p>
+            </div>
+          </div>
+          <div className="flex gap-2 sm:mr-auto">
+            <button
+              onClick={handlePingSitemap}
+              disabled={isPinging}
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors disabled:opacity-60"
+            >
+              <RefreshCw size={15} className={isPinging ? 'animate-spin' : ''} />
+              {isPinging ? 'שולח...' : 'שלח סיטמאפ לגוגל'}
+            </button>
+            <a
+              href="https://search.google.com/search-console"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-bold transition-colors"
+            >
+              <Eye size={15} />
+              Search Console
+            </a>
+          </div>
+          {pingResult === 'success' && (
+            <span className="text-xs font-bold text-green-600 bg-green-50 px-3 py-1 rounded-full">
+              ✅ נשלח בהצלחה!
+            </span>
+          )}
+          {pingResult === 'error' && (
+            <span className="text-xs font-bold text-red-600 bg-red-50 px-3 py-1 rounded-full">
+              ❌ שגיאה
+            </span>
+          )}
+        </div>
+      </div>
+
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {[
           { label: 'משתמשים', value: users.length, icon: Users, color: 'bg-blue-100 text-blue-600', trend: null },

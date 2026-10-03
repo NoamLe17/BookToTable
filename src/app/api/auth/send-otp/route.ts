@@ -26,7 +26,7 @@ export async function POST(request: Request) {
 
     // Send Email
     const { error } = await resend.emails.send({
-      from: 'BookToTable <hello@booktotable.com>',
+      from: process.env.RESEND_FROM_EMAIL || 'BookToTable <onboarding@resend.dev>',
       to: [email],
       subject: 'קוד האימות שלך ל-BookToTable',
       html: `

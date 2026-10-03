@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -19,11 +19,19 @@ type AuthFormData = z.infer<typeof authSchema>;
 
 export default function UnifiedAuthPage() {
   const router = useRouter();
-  const { register: registerAuth, login, loginWithGoogle } = useAuth();
+  const { register: registerAuth, login, loginWithGoogle, firebaseUser, loading } = useAuth();
   const [isLoginMode, setIsLoginMode] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [authError, setAuthError] = useState('');
+
+  // After Google redirect on mobile, firebaseUser is set by useAuth.
+  // Redirect to dashboard when we detect a logged-in user (post-redirect).
+  useEffect(() => {
+    if (!loading && firebaseUser && !isSubmitting) {
+      router.push('/dashboard');
+    }
+  }, [firebaseUser, loading, router, isSubmitting]);
 
   const {
     register,
@@ -69,11 +77,15 @@ export default function UnifiedAuthPage() {
     try {
       setIsSubmitting(true);
       setAuthError('');
-      await loginWithGoogle();
-      setSuccess(true);
-      setTimeout(() => {
-        router.push('/dashboard');
-      }, 1500);
+      const result = await loginWithGoogle();
+      // On mobile, loginWithGoogle triggers a redirect and returns undefined.
+      // The page will be redirected to Google — no need to setSuccess here.
+      if (result) {
+        setSuccess(true);
+        setTimeout(() => {
+          router.push('/dashboard');
+        }, 1500);
+      }
     } catch (error) {
       console.error('Google login failed:', error);
       setAuthError('התחברות עם גוגל נכשלה. אנא נסה שנית.');

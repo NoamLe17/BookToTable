@@ -50,5 +50,13 @@ service cloud.firestore {
     match /admin_notifications/{notifId} {
       allow read, write, delete: if isAdmin();
     }
+
+    // ── OTP codes ────────────────────────────────────────────────────────────
+    // OTPs are written and read only by Firebase Admin SDK (server-side API routes)
+    // No client can directly read/write OTP documents
+    match /otps/{uid} {
+      allow read, write, delete: if false;
+    }
   }
 }
+

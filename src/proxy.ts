@@ -1,24 +1,18 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const ADMIN_EMAIL = 'noamhemo2001@gmail.com';
-
 /**
- * Security Middleware
+ * Security Proxy (Next.js 16 — replaces middleware.ts)
  * 
  * Adds security headers to all responses and blocks direct navigation
  * to protected routes before client-side auth loads.
  * 
- * Note: Full Firebase token verification in middleware requires the Edge runtime
- * and the Firebase Auth REST API. For now, this middleware adds essential
- * security headers and rate-limiting groundwork.
- * 
  * The actual auth gate for /admin is enforced by:
- * 1. This middleware (security headers + bot blocking)
+ * 1. This proxy (security headers + bot blocking)
  * 2. Firebase Admin SDK token verification in each API route
  * 3. Client-side layout guard in admin/layout.tsx
  */
-export function middleware(request: NextRequest) {
+export function proxyMiddleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const response = NextResponse.next();
 
@@ -39,11 +33,9 @@ export function middleware(request: NextRequest) {
     'camera=(), microphone=(), geolocation=(), payment=(self)'
   );
 
-
   // ─── API Route Protection ───────────────────────────────────────────────────
 
   // Block access to API routes that have no public use from browsers
-  // (They are protected by their own auth checks, but add a layer here)
   if (pathname.startsWith('/api/email/broadcast') || pathname.startsWith('/api/indexing/batch')) {
     // These routes require auth — reject preflight/OPTIONS from unexpected origins
     const origin = request.headers.get('origin');

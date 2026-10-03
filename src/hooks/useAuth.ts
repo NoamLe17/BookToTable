@@ -9,11 +9,21 @@ import {
   User as FirebaseUser,
   updateProfile,
   GoogleAuthProvider,
-  signInWithPopup
+  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { getUserById, createUser } from '@/lib/firestore';
 import { User } from '@/types';
+
+/** Returns true when running on a mobile/tablet browser */
+function isMobile(): boolean {
+  if (typeof window === 'undefined') return false;
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+    navigator.userAgent
+  );
+}
 
 export function useAuth() {
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
@@ -21,6 +31,29 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Handle redirect result from Google Sign-In on mobile
+    getRedirectResult(auth)
+      .then(async (result) => {
+        if (result?.user) {
+          const fbUser = result.user;
+          let userData = await getUserById(fbUser.uid);
+          if (!userData) {
+            await createUser(fbUser.uid, {
+              name: fbUser.displayName || 'משתמש גוגל',
+              email: fbUser.email || '',
+              allowsFanMail: false,
+              stripeOnboarded: false,
+              avatarUrl: fbUser.photoURL || undefined,
+            });
+            userData = await getUserById(fbUser.uid);
+          }
+          setUser(userData);
+        }
+      })
+      .catch((err) => {
+        console.error('Google redirect result error:', err);
+      });
+
     const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
       setFirebaseUser(fbUser);
       if (fbUser) {
@@ -81,8 +114,18 @@ export function useAuth() {
   }, []);
 
   const loginWithGoogle = useCallback(async () => {
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
+
     try {
-      const provider = new GoogleAuthProvider();
+      if (isMobile()) {
+        // On mobile, use redirect flow (popup is blocked by Safari/iOS)
+        await signInWithRedirect(auth, provider);
+        // The page will redirect to Google — result is handled in the useEffect above
+        return;
+      }
+
+      // Desktop: use popup
       const cred = await signInWithPopup(auth, provider);
       
       // Check if user exists in our DB, if not, create them
@@ -102,6 +145,10 @@ export function useAuth() {
     } catch (error: any) {
       if (error.code === 'auth/api-key-not-valid') {
         alert("שגיאה: חסר מפתח API חוקי של Firebase. אנא עדכן את קובץ .env.local כפי שמוסבר במדריך.");
+      }
+      // Ignore popup-closed-by-user errors silently
+      if (error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request') {
+        return;
       }
       throw error;
     }
