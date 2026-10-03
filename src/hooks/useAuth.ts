@@ -123,43 +123,15 @@ export function useAuth() {
     provider.setCustomParameters({ prompt: 'select_account' });
 
     try {
-      if (isMobile()) {
-        await signInWithRedirect(auth, provider);
-        return null;
-      }
-
-      try {
-        const cred = await signInWithPopup(auth, provider);
-        await ensureGoogleUser(cred.user);
-        return cred;
-      } catch (popupError: unknown) {
-        const firebaseError = popupError as { code?: string; message?: string };
-
-        if (firebaseError.code === 'auth/popup-blocked' || firebaseError.code === 'auth/cancelled-popup-request') {
-          await signInWithRedirect(auth, provider);
-          return null;
-        }
-
-        if (
-          firebaseError.code === 'auth/redirect-uri-mismatch' ||
-          firebaseError.code === 'auth/unauthorized-domain' ||
-          firebaseError.code === 'auth/invalid-domain' ||
-          firebaseError.message?.includes('redirect_uri')
-        ) {
-          throw new Error('Google Auth לא מוגדר כראוי ב-Firebase. יש להוסיף את הדומיינים/redirect URIs הנכונים: localhost, www.booktotable.com, והדומיין המופעל ב-Vercel.');
-        }
-
-        throw popupError;
-      }
+      // Redirect-based Google auth is more reliable in browsers with popup restrictions,
+      // strict COOP policies, and Safari/iOS restrictions.
+      await signInWithRedirect(auth, provider);
+      return null;
     } catch (error: unknown) {
       const firebaseError = error as { code?: string; message?: string };
 
       if (firebaseError.code === 'auth/api-key-not-valid') {
         alert('שגיאה: חסר מפתח API חוקי של Firebase. אנא עדכן את קובץ .env.local כפי שמוסבר במדריך.');
-      }
-
-      if (firebaseError.code === 'auth/popup-closed-by-user' || firebaseError.code === 'auth/cancelled-popup-request') {
-        return null;
       }
 
       if (
@@ -173,7 +145,7 @@ export function useAuth() {
 
       throw error;
     }
-  }, [ensureGoogleUser]);
+  }, []);
 
   const logout = useCallback(async () => {
     await signOut(auth);
