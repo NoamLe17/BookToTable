@@ -3,17 +3,31 @@ import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+type EmailCartItem = {
+  book: {
+    title: string;
+    authorName?: string;
+    price: number;
+  };
+  quantity: number;
+};
+
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const { readerDetails, items, orderIds, totalPaid } = body;
+    const body = (await request.json()) as {
+      readerDetails?: { name?: string; email?: string; address?: string; city?: string; zip?: string; phone?: string };
+      items?: EmailCartItem[];
+      orderIds?: string[];
+      totalPaid?: number;
+    };
+    const { readerDetails, items = [], orderIds = [], totalPaid = 0 } = body;
 
     if (!readerDetails || !readerDetails.email) {
       return NextResponse.json({ error: 'Missing email address' }, { status: 400 });
     }
 
     // Build items list HTML
-    const itemsHtml = items.map((item: any) => `
+    const itemsHtml = items.map((item: EmailCartItem) => `
       <tr>
         <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.book.title} (x${item.quantity})</td>
         <td style="padding: 10px; border-bottom: 1px solid #eee;">מאת: ${item.book.authorName}</td>

@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useRouter } from 'next/navigation';
-import { ShieldCheck, Truck, ArrowRight, Loader2, MapPin, Store, Info, X } from 'lucide-react';
+import { ShieldCheck, Truck, ArrowRight, Loader2, MapPin, Store, Info } from 'lucide-react';
 import Link from 'next/link';
 import { calculateDistance } from '@/lib/distance';
 import { getUserById } from '@/lib/firestore';
@@ -175,9 +175,10 @@ export default function CheckoutPage() {
         throw new Error('No payment URL returned');
       }
       
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Checkout failed:", error);
-      alert(`אירעה שגיאה ביצירת עמוד התשלום: ${error.message}`);
+      const message = error instanceof Error ? error.message : 'שגיאה לא ידועה';
+      alert(`אירעה שגיאה ביצירת עמוד התשלום: ${message}`);
       setIsSubmitting(false);
     }
   };
@@ -540,8 +541,8 @@ export default function CheckoutPage() {
             
             <div className="p-6">
               <p className="text-gray-700 mb-6 leading-relaxed text-center">
-                לקוח יקר, זיהינו כי כתובת המשלוח שהזנת רחוקה במיוחד מכתובת האריזה של הסופר (מעל 40 ק"מ). 
-                <br/><br/>
+                לקוח יקר, זיהינו כי כתובת המשלוח שהזנת רחוקה במיוחד מכתובת האריזה של הסופר (מעל 40 ק&quot;מ).
+                <br /><br />
                 בהתאם לכך, חברת השליחויות דורשת תוספת של <strong>{extraShippingFee} ₪</strong> לדמי המשלוח. הסכום הכולל עודכן בסיכום ההזמנה.
               </p>
 

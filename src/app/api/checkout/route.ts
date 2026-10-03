@@ -1,17 +1,45 @@
 import { NextResponse } from 'next/server';
 import { createOrder } from '@/lib/firestore';
 
+type CheckoutItem = {
+  book: {
+    id: string;
+    title: string;
+    authorId: string;
+    price: number;
+  };
+  quantity: number;
+};
+
+type CheckoutBody = {
+  readerDetails: {
+    name: string;
+    email: string;
+    phone: string;
+    address: string;
+    city: string;
+    zip: string;
+  };
+  itemsByAuthor: Record<string, CheckoutItem[]>;
+  totalToPay: number;
+  baseUrl: string | URL;
+};
+
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const { readerDetails, itemsByAuthor, totalToPay, baseUrl } = body;
+    const body = (await request.json()) as Partial<CheckoutBody>;
+    const { readerDetails, itemsByAuthor = {}, totalToPay = 0, baseUrl } = body;
+
+    if (!readerDetails || !baseUrl || !itemsByAuthor) {
+      return NextResponse.json({ error: 'Missing checkout payload' }, { status: 400 });
+    }
 
     // We need to map the cart items into PayPlus items
-    const orderIds = [];
+    const orderIds: string[] = [];
 
     // 1. Create orders in Firestore (Pending Payment Status)
     for (const [authorId, authorItems] of Object.entries(itemsByAuthor)) {
-      const itemsList = authorItems as any[];
+      const itemsList = Array.isArray(authorItems) ? authorItems : [];
       
       let authorTotalAmount = 0; // Total books amount for this author
       
@@ -52,7 +80,7 @@ export async function POST(request: Request) {
     // ----------------------------------------------------
     // EMAIL NOTIFICATIONS (MUST AWAIT IN VERCEL)
     // ----------------------------------------------------
-    const emailPromises = [];
+    const emailPromises: Promise<Response>[] = [];
 
     // 1. Fire off the confirmation email to the Buyer
     emailPromises.push(
@@ -71,7 +99,7 @@ export async function POST(request: Request) {
     // 2. Fire off notification emails to the Authors
     let orderIndex = 0;
     for (const [authorId, authorItems] of Object.entries(itemsByAuthor)) {
-      const itemsList = authorItems as any[];
+      const itemsList = Array.isArray(authorItems) ? authorItems : [];
       const authorOrderIds = orderIds.slice(orderIndex, orderIndex + itemsList.length);
       orderIndex += itemsList.length;
 
@@ -95,7 +123,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ url: successUrl.toString() });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Checkout API Error:', error);
     return NextResponse.json(
       { error: 'Internal Server Error' },

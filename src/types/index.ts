@@ -10,6 +10,7 @@ export interface User {
   stripeAccountId?: string;
   stripeOnboarded: boolean;
   allowsFanMail: boolean;
+  emailVerified?: boolean;
   paymentLink?: string; // Legacy
   paymentMethods?: {
     bit?: string;

@@ -39,7 +39,7 @@ export async function POST(request: Request) {
     const fromEmail = process.env.RESEND_FROM_EMAIL || 'BookToTable <onboarding@resend.dev>';
 
     // Fetch target emails from Firestore Admin SDK
-    let emails: { id: string; email: string; name: string }[] = [];
+    const emails: { id: string; email: string; name: string }[] = [];
 
     if (targetUserIds && targetUserIds.length > 0) {
       // Send to specific users
@@ -102,9 +102,10 @@ ${message}
         results.push({ email: recipient.email, success: !error, error: error?.message });
         // Small delay to avoid rate limits
         await new Promise(r => setTimeout(r, 300));
-      } catch (err: any) {
-        console.error(`[Broadcast] Exception sending to ${recipient.email}:`, err.message);
-        results.push({ email: recipient.email, success: false, error: err.message });
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'Unknown error';
+        console.error(`[Broadcast] Exception sending to ${recipient.email}:`, message);
+        results.push({ email: recipient.email, success: false, error: message });
       }
     }
 
@@ -126,8 +127,9 @@ ${message}
       results,
       failureReasons,
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Broadcast Email Error:', err);
-    return NextResponse.json({ error: 'Internal Server Error', details: err.message }, { status: 500 });
+    const message = err instanceof Error ? err.message : 'Internal Server Error';
+    return NextResponse.json({ error: 'Internal Server Error', details: message }, { status: 500 });
   }
 }

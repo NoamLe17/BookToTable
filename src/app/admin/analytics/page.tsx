@@ -10,6 +10,28 @@ import {
 
 type Period = '1d' | '7d' | '30d' | '90d' | '365d' | 'all';
 
+type AnalyticsRecord = {
+  id: string;
+  createdAt?: number | { toMillis?: () => number };
+  [key: string]: unknown;
+};
+
+type AnalyticsUser = AnalyticsRecord & { name?: string; email?: string };
+type AnalyticsBook = AnalyticsRecord & {
+  title?: string;
+  authorName?: string;
+  price?: number;
+  coverUrl?: string;
+  isPublished?: boolean;
+};
+type AnalyticsOrder = AnalyticsRecord & {
+  totalPaid?: number;
+  status?: string;
+  bookTitle?: string;
+  bookId?: string;
+  readerDetails?: { name?: string };
+};
+
 const PERIODS: { key: Period; label: string }[] = [
   { key: '1d',   label: 'היום' },
   { key: '7d',   label: '7 ימים' },
@@ -27,24 +49,25 @@ function getPeriodMs(period: Period): number | null {
   return map[period];
 }
 
-function getTs(item: any): number {
+function getTs(item: AnalyticsRecord): number {
   if (typeof item.createdAt === 'number') return item.createdAt;
-  if (item.createdAt?.toMillis) return item.createdAt.toMillis();
+  if (typeof item.createdAt === 'object' && item.createdAt && 'toMillis' in item.createdAt && typeof item.createdAt.toMillis === 'function') {
+    return item.createdAt.toMillis();
+  }
   return 0;
 }
 
-function filterCurrent<T>(items: T[], period: Period): T[] {
+function filterCurrent<T extends AnalyticsRecord>(items: T[], period: Period, nowMs: number): T[] {
   const ms = getPeriodMs(period);
   if (!ms) return items;
-  const cutoff = Date.now() - ms;
+  const cutoff = nowMs - ms;
   return items.filter(i => getTs(i) >= cutoff);
 }
 
-function filterPrev<T>(items: T[], period: Period): T[] {
+function filterPrev<T extends AnalyticsRecord>(items: T[], period: Period, nowMs: number): T[] {
   const ms = getPeriodMs(period);
   if (!ms) return [];
-  const now = Date.now();
-  return items.filter(i => { const t = getTs(i); return t >= now - ms*2 && t < now - ms; });
+  return items.filter(i => { const t = getTs(i); return t >= nowMs - ms*2 && t < nowMs - ms; });
 }
 
 function fmtDate(ms: number) {
@@ -67,10 +90,11 @@ const statusColor = (s: string) => ({ pending:'bg-yellow-100 text-yellow-700', s
 
 export default function AnalyticsPage() {
   const [period, setPeriod] = useState<Period>('30d');
-  const [users, setUsers] = useState<any[]>([]);
-  const [books, setBooks] = useState<any[]>([]);
-  const [orders, setOrders] = useState<any[]>([]);
+  const [users, setUsers] = useState<AnalyticsUser[]>([]);
+  const [books, setBooks] = useState<AnalyticsBook[]>([]);
+  const [orders, setOrders] = useState<AnalyticsOrder[]>([]);
   const [loading, setLoading] = useState(true);
+  const [nowMs] = useState<number>(() => Date.now());
 
   useEffect(() => {
     let n = 0;
@@ -81,12 +105,13 @@ export default function AnalyticsPage() {
     return () => { u1(); u2(); u3(); };
   }, []);
 
-  const curU = useMemo(() => filterCurrent(users, period), [users, period]);
-  const prevU = useMemo(() => filterPrev(users, period), [users, period]);
-  const curB = useMemo(() => filterCurrent(books, period), [books, period]);
-  const prevB = useMemo(() => filterPrev(books, period), [books, period]);
-  const curO = useMemo(() => filterCurrent(orders, period), [orders, period]);
-  const prevO = useMemo(() => filterPrev(orders, period), [orders, period]);
+  const safeNowMs = nowMs || 0;
+  const curU = useMemo<AnalyticsUser[]>(() => filterCurrent(users, period, safeNowMs), [users, period, safeNowMs]);
+  const prevU = useMemo<AnalyticsUser[]>(() => filterPrev(users, period, safeNowMs), [users, period, safeNowMs]);
+  const curB = useMemo<AnalyticsBook[]>(() => filterCurrent(books, period, safeNowMs), [books, period, safeNowMs]);
+  const prevB = useMemo<AnalyticsBook[]>(() => filterPrev(books, period, safeNowMs), [books, period, safeNowMs]);
+  const curO = useMemo<AnalyticsOrder[]>(() => filterCurrent(orders, period, safeNowMs), [orders, period, safeNowMs]);
+  const prevO = useMemo<AnalyticsOrder[]>(() => filterPrev(orders, period, safeNowMs), [orders, period, safeNowMs]);
   const curRev = useMemo(() => curO.reduce((s,o) => s+(o.totalPaid||0), 0), [curO]);
   const prevRev = useMemo(() => prevO.reduce((s,o) => s+(o.totalPaid||0), 0), [prevO]);
 
@@ -94,8 +119,9 @@ export default function AnalyticsPage() {
     const ms = getPeriodMs(period) ?? 30*86400000;
     const daysCount = Math.min(Math.round(ms/86400000), 30);
     const days: Record<string,number> = {};
+    const anchorMs = safeNowMs;
     for (let i = daysCount-1; i >= 0; i--) {
-      const k = new Date(Date.now()-i*86400000).toLocaleDateString('he-IL',{day:'2-digit',month:'2-digit'});
+      const k = new Date(anchorMs - i*86400000).toLocaleDateString('he-IL',{day:'2-digit',month:'2-digit'});
       days[k] = 0;
     }
     curO.forEach(o => {
@@ -103,7 +129,7 @@ export default function AnalyticsPage() {
       if (k in days) days[k] += (o.totalPaid||0);
     });
     return Object.entries(days);
-  }, [curO, period]);
+  }, [curO, period, safeNowMs]);
 
   const maxRev = Math.max(...dailyRevenue.map(([,v])=>v), 1);
 
@@ -239,17 +265,20 @@ export default function AnalyticsPage() {
             <span className="text-xs font-bold bg-purple-200 text-purple-800 px-2 py-0.5 rounded-full">{curO.length}</span>
           </div>
           <div className="divide-y divide-gray-50 max-h-72 overflow-y-auto">
-            {curO.slice(0,20).map(o => (
-              <div key={o.id} className="flex items-center gap-3 p-3 hover:bg-gray-50">
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-bold truncate">{o.bookTitle||o.bookId||'ספר'}</p>
-                  <p className="text-[10px] text-gray-400 truncate">{o.readerDetails?.name} · ₪{o.totalPaid}</p>
+            {curO.slice(0,20).map(o => {
+              const orderStatus = o.status ?? 'pending';
+              return (
+                <div key={o.id} className="flex items-center gap-3 p-3 hover:bg-gray-50">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-bold truncate">{o.bookTitle||o.bookId||'ספר'}</p>
+                    <p className="text-[10px] text-gray-400 truncate">{o.readerDetails?.name} · ₪{o.totalPaid}</p>
+                  </div>
+                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0 ${statusColor(orderStatus)}`}>
+                    {statusLabel(orderStatus)}
+                  </span>
                 </div>
-                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0 ${statusColor(o.status)}`}>
-                  {statusLabel(o.status)}
-                </span>
-              </div>
-            ))}
+              );
+            })}
             {curO.length===0 && <p className="p-6 text-center text-gray-400 text-sm">אין הזמנות בתקופה זו</p>}
           </div>
         </div>
@@ -260,7 +289,10 @@ export default function AnalyticsPage() {
         <h2 className="text-sm font-bold text-gray-700 mb-4">פירוט סטטוס הזמנות — {PERIODS.find(p=>p.key===period)?.label}</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {['pending','shipped','delivered','cancelled'].map(s => {
-            const count = curO.filter(o => o.status===s || (s==='pending' && o.status==='pending_payment')).length;
+            const count = curO.filter(o => {
+              const orderStatus = o.status ?? 'pending';
+              return orderStatus === s || (s === 'pending' && orderStatus === 'pending_payment');
+            }).length;
             return (
               <div key={s} className={`rounded-xl p-3 text-center ${statusColor(s)}`}>
                 <p className="text-2xl font-black">{count}</p>

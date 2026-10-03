@@ -111,8 +111,9 @@ function VerifyContent() {
         router.push('/dashboard');
       }, 2000);
 
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'שגיאה באימות הקוד';
+      setError(message);
       // Clear code on error for better UX
       setCode(['', '', '', '', '', '']);
       inputRefs.current[0]?.focus();
@@ -145,7 +146,7 @@ function VerifyContent() {
       // Reset inputs
       setCode(['', '', '', '', '', '']);
       inputRefs.current[0]?.focus();
-    } catch (err: any) {
+    } catch {
       setError('לא הצלחנו לשלוח קוד חדש, נסה שוב מאוחר יותר.');
     } finally {
       setIsResending(false);

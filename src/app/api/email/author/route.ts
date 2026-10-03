@@ -3,9 +3,21 @@ import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+type AuthorEmailItem = {
+  book: {
+    title: string;
+  };
+  quantity: number;
+};
+
 export async function POST(request: Request) {
   try {
-    const { authorId, readerDetails, items, orderIds } = await request.json();
+    const { authorId, readerDetails, items = [], orderIds = [] } = (await request.json()) as {
+      authorId?: string;
+      readerDetails?: { name?: string; buyerNote?: string; address?: string; city?: string; zip?: string; phone?: string; email?: string };
+      items?: AuthorEmailItem[];
+      orderIds?: string[];
+    };
 
     if (!authorId || !readerDetails || !items || !orderIds) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -17,7 +29,7 @@ export async function POST(request: Request) {
       timeStyle: 'short'
     });
 
-    const itemsHtml = items.map((item: any, idx: number) => `
+    const itemsHtml = items.map((item: AuthorEmailItem, idx: number) => `
       <div style="margin-bottom: 12px; padding: 12px; background-color: #f9fafb; border-radius: 8px;">
         <p style="margin: 0; font-size: 16px; font-weight: bold; color: #111827;">${item.book.title}</p>
         <p style="margin: 4px 0 0 0; color: #4b5563;">כמות: ${item.quantity} | מס' הזמנה: ${orderIds[idx]}</p>
@@ -75,10 +87,11 @@ export async function POST(request: Request) {
     `;
 
     // Resend free tier allows sending to verified domain emails only, so we mock it to user email
+    const recipientEmail = readerDetails.email || 'noreply@booktotable.com';
     const data = await resend.emails.send({
       from: 'BookToTable Orders <onboarding@resend.dev>',
-      to: [readerDetails.email], // In production: Author's email.
-      subject: `הזמנה חדשה התקבלה! - ${readerDetails.name}`,
+      to: [recipientEmail], // In production: Author's email.
+      subject: `הזמנה חדשה התקבלה! - ${readerDetails.name || 'לקוח'}`,
       html: htmlContent,
     });
 

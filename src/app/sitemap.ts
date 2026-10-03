@@ -14,7 +14,7 @@ async function getPublishedBookIds(): Promise<{ id: string; updatedAt: Date }[]>
 
     return snap.docs.map((doc: QueryDocumentSnapshot) => ({
       id: doc.id,
-      updatedAt: (doc as any).updateTime?.toDate() || new Date(),
+      updatedAt: doc.updateTime ? doc.updateTime.toDate() : new Date(),
     }));
   } catch (error) {
     console.error('Sitemap: Failed to fetch books from Firestore:', error);

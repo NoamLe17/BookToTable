@@ -17,7 +17,7 @@ function CheckoutSuccessContent() {
     authorName: string; 
     amount: number; 
     paymentLink: string;
-    paymentMethods?: any;
+    paymentMethods?: User['paymentMethods'];
   }[]>([]);
   const [loading, setLoading] = useState(true);
 

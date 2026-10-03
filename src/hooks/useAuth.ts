@@ -80,7 +80,7 @@ export function useAuth() {
     name: string,
     allowsFanMail: boolean = false,
     pickupAddress?: { street: string; city: string; zip: string; phone: string; },
-    paymentMethods?: any
+    paymentMethods?: User['paymentMethods']
   ) => {
     try {
       const cred = await createUserWithEmailAndPassword(auth, email, password);
@@ -105,8 +105,9 @@ export function useAuth() {
       });
       
       return cred;
-    } catch (error: any) {
-      if (error.code === 'auth/api-key-not-valid') {
+    } catch (error: unknown) {
+      const firebaseError = error as { code?: string };
+      if (firebaseError.code === 'auth/api-key-not-valid') {
         alert("שגיאה: חסר מפתח API חוקי של Firebase. אנא עדכן את קובץ .env.local כפי שמוסבר במדריך.");
       }
       throw error;
@@ -142,12 +143,13 @@ export function useAuth() {
       }
       setUser(userData);
       return cred;
-    } catch (error: any) {
-      if (error.code === 'auth/api-key-not-valid') {
+    } catch (error: unknown) {
+      const firebaseError = error as { code?: string };
+      if (firebaseError.code === 'auth/api-key-not-valid') {
         alert("שגיאה: חסר מפתח API חוקי של Firebase. אנא עדכן את קובץ .env.local כפי שמוסבר במדריך.");
       }
       // Ignore popup-closed-by-user errors silently
-      if (error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request') {
+      if (firebaseError.code === 'auth/popup-closed-by-user' || firebaseError.code === 'auth/cancelled-popup-request') {
         return;
       }
       throw error;

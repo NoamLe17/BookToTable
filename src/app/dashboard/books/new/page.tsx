@@ -20,6 +20,11 @@ const bookSchema = z.object({
 
 type BookFormData = z.infer<typeof bookSchema>;
 
+const buildCoverPath = (userId: string, fileName: string) => {
+  const stamp = Date.now();
+  return `covers/${userId}_${stamp}_${fileName}`;
+};
+
 export default function AddBookPage() {
   const { user } = useAuth();
   const router = useRouter();
@@ -56,7 +61,7 @@ export default function AddBookPage() {
     setIsSubmitting(true);
     try {
       // 1. Upload Cover Image to Firebase Storage
-      const filePath = `covers/${user.id}_${Date.now()}_${coverFile.name}`;
+      const filePath = buildCoverPath(user.id, coverFile.name);
       const coverUrl = await uploadFile(coverFile, filePath, (progress) => {
         setUploadProgress(progress);
       });

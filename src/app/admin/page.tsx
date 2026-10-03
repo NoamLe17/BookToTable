@@ -16,15 +16,34 @@ import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-type SortKey = 'name' | 'email' | 'bookCount';
+type AdminUser = { id: string; name?: string; email?: string; createdAt?: number };
+type AdminBook = {
+  id: string;
+  authorId?: string;
+  title?: string;
+  coverUrl?: string;
+  price?: number;
+  isPublished?: boolean;
+  createdAt?: number;
+  salesCount?: number;
+};
+type AdminOrder = {
+  id: string;
+  bookTitle?: string;
+  bookId?: string;
+  readerDetails?: { name?: string; email?: string; city?: string; zip?: string; address?: string };
+  totalPaid?: number;
+  status?: string;
+  createdAt?: number;
+};
 
 export default function AdminDashboard() {
   const { firebaseUser } = useAuth();
   const router = useRouter();
 
-  const [users, setUsers] = useState<any[]>([]);
-  const [books, setBooks] = useState<any[]>([]);
-  const [orders, setOrders] = useState<any[]>([]);
+  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [books, setBooks] = useState<AdminBook[]>([]);
+  const [orders, setOrders] = useState<AdminOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedUser, setExpandedUser] = useState<string | null>(null);
   const [isPinging, setIsPinging] = useState(false);
@@ -67,8 +86,9 @@ export default function AdminDashboard() {
         try { await deleteObject(ref(storage, coverUrl)); } catch { /* ok */ }
       }
       toast.success('הספר נמחק בהצלחה');
-    } catch (err: any) {
-      toast.error('שגיאה במחיקה: ' + err.message);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'שגיאה במחיקה';
+      toast.error('שגיאה במחיקה: ' + message);
     }
   };
 
@@ -81,10 +101,13 @@ export default function AdminDashboard() {
         fetch(`https://www.google.com/ping?sitemap=${encodeURIComponent('https://www.booktotable.com/sitemap.xml')}`),
         fetch(`https://www.bing.com/ping?sitemap=${encodeURIComponent('https://www.booktotable.com/sitemap.xml')}`),
       ]);
+      void googleRes;
+      void bingRes;
       setPingResult('success');
       toast.success('\u05e1יטמאפ נשלח לגוגל + Bing בהצלחה! גוגל יסרוק את הסיטמאפ בקרוב');
-    } catch (err: any) {
+    } catch (err: unknown) {
       setPingResult('error');
+      console.error(err);
       toast.error('שגיאה בשליחת הסיטמאפ');
     } finally {
       setIsPinging(false);
@@ -119,8 +142,9 @@ export default function AdminDashboard() {
       } else {
         toast.error('שגיאה: ' + res.error, { id: toastId });
       }
-    } catch (err: any) {
-      toast.error('הפעולה נכשלה: ' + err.message);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'הפעולה נכשלה';
+      toast.error('הפעולה נכשלה: ' + message);
     }
   };
 
@@ -135,8 +159,8 @@ export default function AdminDashboard() {
     );
   }
 
-  const revenue = orders.reduce((sum: number, o: any) => sum + (o.totalPaid || 0), 0);
-  const pendingOrders = orders.filter((o: any) => o.status === 'pending' || o.status === 'pending_payment').length;
+  const revenue = orders.reduce((sum: number, o: AdminOrder) => sum + (o.totalPaid || 0), 0);
+  const pendingOrders = orders.filter((o: AdminOrder) => o.status === 'pending' || o.status === 'pending_payment').length;
 
   return (
     <div className="space-y-6 sm:space-y-8">
@@ -261,7 +285,7 @@ export default function AdminDashboard() {
                       <Eye size={14} /> צפה בדשבורד
                     </button>
                     <button
-                      onClick={() => handleDeleteUser(u.id, u.name || u.email)}
+                      onClick={() => handleDeleteUser(u.id, u.name || u.email || 'משתמש')}
                       className="flex items-center gap-1.5 bg-red-50 hover:bg-red-100 text-red-700 px-3 py-2 rounded-lg text-xs font-bold"
                     >
                       <Trash2 size={14} /> מחק משתמש
@@ -307,7 +331,7 @@ export default function AdminDashboard() {
                         <Eye size={14} /> צפה בדשבורד
                       </button>
                       <button
-                        onClick={() => handleDeleteUser(u.id, u.name || u.email)}
+                        onClick={() => handleDeleteUser(u.id, u.name || u.email || 'משתמש')}
                         className="flex items-center gap-1 bg-red-50 hover:bg-red-100 text-red-600 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors"
                       >
                         <Trash2 size={14} /> מחק
@@ -361,7 +385,7 @@ export default function AdminDashboard() {
                   <Eye size={13} /> צפה
                 </Link>
                 <button
-                  onClick={() => handleDeleteBook(b.id, b.title, b.coverUrl)}
+                  onClick={() => handleDeleteBook(b.id, b.title || 'ספר', b.coverUrl || '')}
                   className="flex items-center gap-1 text-red-600 text-xs font-bold"
                 >
                   <Trash2 size={13} /> מחק
@@ -417,7 +441,7 @@ export default function AdminDashboard() {
                         <Eye size={13} /> צפה
                       </Link>
                       <button
-                        onClick={() => handleDeleteBook(b.id, b.title, b.coverUrl)}
+                        onClick={() => handleDeleteBook(b.id, b.title || 'ספר', b.coverUrl || '')}
                         className="flex items-center gap-1 text-red-500 hover:bg-red-50 px-2 py-1.5 rounded transition-colors text-xs font-bold"
                       >
                         <Trash2 size={13} /> מחק
@@ -450,8 +474,8 @@ export default function AdminDashboard() {
                 <ShoppingBag size={16} className="text-purple-600" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-bold text-sm truncate">{o.bookTitle || o.bookId}</p>
-                <p className="text-xs text-gray-400">{o.readerDetails?.name} · ₪{o.totalPaid}</p>
+                <p className="font-bold text-sm truncate">{o.bookTitle || o.bookId || 'ספר'}</p>
+                <p className="text-xs text-gray-400">{o.readerDetails?.name ?? '—'} · ₪{o.totalPaid ?? 0}</p>
               </div>
               <span className={`text-xs font-bold px-2 py-0.5 rounded-full shrink-0 ${
                 o.status === 'delivered' ? 'bg-green-100 text-green-700'

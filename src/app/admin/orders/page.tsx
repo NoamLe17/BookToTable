@@ -30,15 +30,42 @@ function fmtDate(ms: number) {
   return new Date(ms).toLocaleDateString('he-IL', { day:'2-digit', month:'2-digit', year:'2-digit' });
 }
 
-function getTs(item: any): number {
+type OrderRecord = {
+  id: string;
+  authorId?: string;
+  authorName?: string;
+  bookTitle?: string;
+  bookId?: string;
+  readerDetails?: {
+    name?: string;
+    email?: string;
+    address?: string;
+    city?: string;
+    zip?: string;
+  };
+  createdAt?: number | { toMillis?: () => number };
+  totalPaid?: number;
+  quantity?: number;
+  status?: string;
+};
+
+type UserRecord = {
+  id: string;
+  name?: string;
+  email?: string;
+};
+
+function getTs(item: OrderRecord): number {
   if (typeof item.createdAt === 'number') return item.createdAt;
-  if (item.createdAt?.toMillis) return item.createdAt.toMillis();
+  if (item.createdAt && typeof item.createdAt === 'object' && 'toMillis' in item.createdAt && typeof item.createdAt.toMillis === 'function') {
+    return item.createdAt.toMillis();
+  }
   return 0;
 }
 
 export default function OrdersPage() {
-  const [orders, setOrders] = useState<any[]>([]);
-  const [users, setUsers] = useState<any[]>([]);
+  const [orders, setOrders] = useState<OrderRecord[]>([]);
+  const [users, setUsers] = useState<UserRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -60,7 +87,7 @@ export default function OrdersPage() {
 
   // Group orders by author
   const byAuthor = useMemo(() => {
-    const map: Record<string, { authorId: string; authorName: string; authorEmail: string; orders: any[] }> = {};
+    const map: Record<string, { authorId: string; authorName: string; authorEmail: string; orders: OrderRecord[] }> = {};
     orders.forEach(o => {
       const aid = o.authorId || 'unknown';
       if (!map[aid]) {
@@ -85,14 +112,21 @@ export default function OrdersPage() {
   const totalRevenue = useMemo(() => orders.reduce((s,o) => s+(o.totalPaid||0), 0), [orders]);
   const statusCounts = useMemo(() => {
     const c: Record<string,number> = {};
-    orders.forEach(o => { c[o.status] = (c[o.status]||0)+1; });
+    orders.forEach(o => {
+      const statusKey = o.status ?? 'pending';
+      c[statusKey] = (c[statusKey] || 0) + 1;
+    });
     return c;
   }, [orders]);
 
   const toggleSelect = (id: string) => {
     setSelected(prev => {
       const n = new Set(prev);
-      n.has(id) ? n.delete(id) : n.add(id);
+      if (n.has(id)) {
+        n.delete(id);
+      } else {
+        n.add(id);
+      }
       return n;
     });
   };
@@ -107,8 +141,9 @@ export default function OrdersPage() {
       await batch.commit();
       setSelected(new Set());
       toast.success(`נמחקו ${selected.size} הזמנות`);
-    } catch (e: any) {
-      toast.error('שגיאה: ' + e.message);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'שגיאה לא ידועה';
+      toast.error('שגיאה: ' + message);
     } finally {
       setDeleting(false);
     }
@@ -119,8 +154,9 @@ export default function OrdersPage() {
     try {
       await deleteDoc(doc(db, 'orders', id));
       toast.success('הזמנה נמחקה');
-    } catch (e: any) {
-      toast.error('שגיאה: ' + e.message);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'שגיאה לא ידועה';
+      toast.error('שגיאה: ' + message);
     }
   };
 
@@ -255,38 +291,41 @@ export default function OrdersPage() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-50">
-                        {author.orders.map(o => (
-                          <tr key={o.id} className={`hover:bg-gray-50 transition-colors ${selected.has(o.id) ? 'bg-red-50' : ''}`}>
-                            <td className="p-3">
-                              <input type="checkbox" checked={selected.has(o.id)} onChange={() => toggleSelect(o.id)} className="rounded"/>
-                            </td>
-                            <td className="p-3 font-bold text-sm max-w-[150px]">
-                              <p className="truncate">{o.bookTitle || o.bookId || 'ספר'}</p>
-                            </td>
-                            <td className="p-3 text-sm">
-                              <p className="font-medium truncate max-w-[120px]">{o.readerDetails?.name || '—'}</p>
-                              <p className="text-xs text-gray-400 truncate">{o.readerDetails?.email}</p>
-                            </td>
-                            <td className="p-3 text-xs text-gray-500 max-w-[140px]">
-                              <p className="truncate">{o.readerDetails?.address}</p>
-                              <p className="truncate">{o.readerDetails?.city} {o.readerDetails?.zip}</p>
-                            </td>
-                            <td className="p-3 text-sm text-center">{o.quantity || 1}</td>
-                            <td className="p-3 text-sm font-bold">₪{o.totalPaid}</td>
-                            <td className="p-3 text-xs text-gray-500 whitespace-nowrap">{fmtDate(getTs(o))}</td>
-                            <td className="p-3">
-                              <span className={`flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full border w-fit ${statusColor(o.status)}`}>
-                                {statusIcon(o.status)}{statusLabel(o.status)}
-                              </span>
-                            </td>
-                            <td className="p-3">
-                              <button onClick={() => handleDeleteOrder(o.id)}
-                                className="text-red-400 hover:text-red-600 hover:bg-red-50 p-1.5 rounded transition-colors">
-                                <Trash2 size={14}/>
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
+                        {author.orders.map(o => {
+                          const orderStatus = o.status ?? 'pending';
+                          return (
+                            <tr key={o.id} className={`hover:bg-gray-50 transition-colors ${selected.has(o.id) ? 'bg-red-50' : ''}`}>
+                              <td className="p-3">
+                                <input type="checkbox" checked={selected.has(o.id)} onChange={() => toggleSelect(o.id)} className="rounded"/>
+                              </td>
+                              <td className="p-3 font-bold text-sm max-w-[150px]">
+                                <p className="truncate">{o.bookTitle || o.bookId || 'ספר'}</p>
+                              </td>
+                              <td className="p-3 text-sm">
+                                <p className="font-medium truncate max-w-[120px]">{o.readerDetails?.name || '—'}</p>
+                                <p className="text-xs text-gray-400 truncate">{o.readerDetails?.email}</p>
+                              </td>
+                              <td className="p-3 text-xs text-gray-500 max-w-[140px]">
+                                <p className="truncate">{o.readerDetails?.address}</p>
+                                <p className="truncate">{o.readerDetails?.city} {o.readerDetails?.zip}</p>
+                              </td>
+                              <td className="p-3 text-sm text-center">{o.quantity || 1}</td>
+                              <td className="p-3 text-sm font-bold">₪{o.totalPaid}</td>
+                              <td className="p-3 text-xs text-gray-500 whitespace-nowrap">{fmtDate(getTs(o))}</td>
+                              <td className="p-3">
+                                <span className={`flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full border w-fit ${statusColor(orderStatus)}`}>
+                                  {statusIcon(orderStatus)}{statusLabel(orderStatus)}
+                                </span>
+                              </td>
+                              <td className="p-3">
+                                <button onClick={() => handleDeleteOrder(o.id)}
+                                  className="text-red-400 hover:text-red-600 hover:bg-red-50 p-1.5 rounded transition-colors">
+                                  <Trash2 size={14}/>
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                       <tfoot className="bg-gray-50 border-t border-gray-200">
                         <tr>
@@ -302,26 +341,29 @@ export default function OrdersPage() {
 
                   {/* Mobile list */}
                   <div className="sm:hidden divide-y divide-gray-100">
-                    {author.orders.map(o => (
-                      <div key={o.id} className={`p-4 ${selected.has(o.id) ? 'bg-red-50' : ''}`}>
-                        <div className="flex items-start gap-3">
-                          <input type="checkbox" checked={selected.has(o.id)} onChange={() => toggleSelect(o.id)} className="rounded mt-1"/>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-bold text-sm truncate">{o.bookTitle||o.bookId||'ספר'}</p>
-                            <p className="text-xs text-gray-500">{o.readerDetails?.name} · ₪{o.totalPaid}</p>
-                            <p className="text-xs text-gray-400">{o.readerDetails?.city} · {fmtDate(getTs(o))}</p>
-                          </div>
-                          <div className="flex flex-col items-end gap-1.5">
-                            <span className={`flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full border ${statusColor(o.status)}`}>
-                              {statusIcon(o.status)}{statusLabel(o.status)}
-                            </span>
-                            <button onClick={() => handleDeleteOrder(o.id)} className="text-red-400 hover:text-red-600 p-1 rounded">
-                              <Trash2 size={13}/>
-                            </button>
+                    {author.orders.map(o => {
+                      const orderStatus = o.status ?? 'pending';
+                      return (
+                        <div key={o.id} className={`p-4 ${selected.has(o.id) ? 'bg-red-50' : ''}`}>
+                          <div className="flex items-start gap-3">
+                            <input type="checkbox" checked={selected.has(o.id)} onChange={() => toggleSelect(o.id)} className="rounded mt-1"/>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-bold text-sm truncate">{o.bookTitle||o.bookId||'ספר'}</p>
+                              <p className="text-xs text-gray-500">{o.readerDetails?.name ?? '—'} · ₪{o.totalPaid ?? 0}</p>
+                              <p className="text-xs text-gray-400">{o.readerDetails?.city ?? '—'} · {fmtDate(getTs(o))}</p>
+                            </div>
+                            <div className="flex flex-col items-end gap-1.5">
+                              <span className={`flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full border ${statusColor(orderStatus)}`}>
+                                {statusIcon(orderStatus)}{statusLabel(orderStatus)}
+                              </span>
+                              <button onClick={() => handleDeleteOrder(o.id)} className="text-red-400 hover:text-red-600 p-1 rounded">
+                                <Trash2 size={13}/>
+                              </button>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                     {/* Mobile summary */}
                     <div className="p-4 bg-gray-50 flex items-center justify-between text-xs font-bold text-gray-600">
                       <span>{author.orders.length} הזמנות · {sold} ספרים</span>

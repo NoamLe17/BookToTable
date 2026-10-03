@@ -6,24 +6,20 @@ import { useRouter, usePathname } from 'next/navigation';
 import { Loader2, Bell, LayoutDashboard, Send, BarChart2, Package } from 'lucide-react';
 import Link from 'next/link';
 import { db } from '@/lib/firebase';
-import { collection, query, where, onSnapshot, orderBy, limit } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, limit } from 'firebase/firestore';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { firebaseUser, loading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  const [isAuthorized, setIsAuthorized] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const isAuthorized = !loading && !!firebaseUser && firebaseUser.email === 'noamhemo2001@gmail.com';
 
   useEffect(() => {
-    if (!loading) {
-      if (!firebaseUser || firebaseUser.email !== 'noamhemo2001@gmail.com') {
-        router.replace('/');
-      } else {
-        setIsAuthorized(true);
-      }
+    if (!loading && !isAuthorized) {
+      router.replace('/');
     }
-  }, [firebaseUser, loading, router]);
+  }, [loading, isAuthorized, router]);
 
   // Subscribe to unread count directly — simpler, more reliable
   useEffect(() => {

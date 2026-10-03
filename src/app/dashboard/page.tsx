@@ -46,7 +46,6 @@ function DashboardContent() {
   // Real-time listeners — updates immediately when books/orders change
   useEffect(() => {
     if (!targetUid) return;
-    setLoading(true);
     let booksLoaded = false;
     let ordersLoaded = false;
 

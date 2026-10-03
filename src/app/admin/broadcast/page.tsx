@@ -16,6 +16,11 @@ interface UserRow {
   email: string;
 }
 
+interface FirestoreUserDoc extends Partial<UserRow> {
+  name?: string;
+  email?: string;
+}
+
 export default function BroadcastPage() {
   const { firebaseUser } = useAuth();
   const [users, setUsers] = useState<UserRow[]>([]);
@@ -33,9 +38,16 @@ export default function BroadcastPage() {
     async function load() {
       try {
         const snap = await getDocs(query(collection(db, 'users'), orderBy('createdAt', 'desc')));
-        setUsers(snap.docs.map(d => ({ id: d.id, ...(d.data() as any) })));
-      } catch (e) {
-        console.error(e);
+        setUsers(snap.docs.map((d) => {
+          const data = d.data() as FirestoreUserDoc;
+          return {
+            id: d.id,
+            name: data.name || 'ללא שם',
+            email: data.email || '',
+          };
+        }));
+      } catch (error) {
+        console.error(error);
       } finally {
         setLoadingUsers(false);
       }
@@ -46,7 +58,11 @@ export default function BroadcastPage() {
   const toggleUser = (id: string) => {
     setSelectedIds(prev => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
       return next;
     });
   };
@@ -95,8 +111,9 @@ export default function BroadcastPage() {
           setSelectedIds(new Set());
         }
       }
-    } catch (e: any) {
-      toast.error('שגיאת רשת: ' + e.message);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'שגיאת רשת';
+      toast.error('שגיאת רשת: ' + message);
     } finally {
       setSending(false);
     }

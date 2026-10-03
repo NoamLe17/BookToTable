@@ -104,11 +104,11 @@ export default function TrackOrderPage() {
                     <p className="text-xl text-gray-900 font-black tracking-widest" dir="ltr">{order.trackingNumber}</p>
                   </div>
                   
-                  <a 
-                    href="https://israelpost.co.il/itemtrace" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center text-green-600 hover:text-green-700 font-bold text-sm bg-green-50 px-4 py-2 rounded-full transition-colors"
+                  <a
+                    href='https://israelpost.co.il/itemtrace'
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    className='inline-flex items-center text-green-600 hover:text-green-700 font-bold text-sm bg-green-50 px-4 py-2 rounded-full transition-colors'
                   >
                     מעקב באתר דואר ישראל <ArrowRight size={16} className="mr-2" />
                   </a>
@@ -132,7 +132,7 @@ export default function TrackOrderPage() {
                   <span className="font-bold text-gray-900">{order.bookTitle}</span>
                 </div>
                 <div className="flex justify-between pt-1">
-                  <span className="text-gray-500 font-medium">סה"כ שולם</span>
+                  <span className="text-gray-500 font-medium">סה״כ שולם</span>
                   <span className="font-bold text-green-600">₪{order.totalPaid.toFixed(2)}</span>
                 </div>
               </div>
@@ -143,8 +143,8 @@ export default function TrackOrderPage() {
       </div>
       
       <div className="mt-8 text-center">
-        <Link href="/" className="text-gray-500 hover:text-green-600 font-medium transition-colors">
-          חזרה לחנות &rarr;
+        <Link href='/' className="text-gray-500 hover:text-green-600 font-medium transition-colors">
+          חזרה לחנות ←
         </Link>
       </div>
 

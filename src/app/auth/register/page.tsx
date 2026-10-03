@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Link from 'next/link';
-import { BookOpen, Upload, CheckCircle2 } from 'lucide-react';
+import { BookOpen, CheckCircle2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -63,7 +63,7 @@ export default function AuthorRegisterPage() {
     setIsSubmitting(true);
     try {
       // Build payment methods object
-      const paymentMethods: any = {};
+      const paymentMethods: Record<string, string | { bankName: string; branch: string; account: string; accountName: string }> = {};
       if (data.hasBit && data.bitPhone) paymentMethods.bit = data.bitPhone;
       if (data.hasPaybox && data.payboxLink) paymentMethods.paybox = data.payboxLink;
       if (data.hasCreditCard && data.creditCardLink) paymentMethods.creditCard = data.creditCardLink;
@@ -334,7 +334,7 @@ export default function AuthorRegisterPage() {
                   <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
                     <label className="flex items-center gap-3 cursor-pointer mb-2">
                       <input type="checkbox" {...register('hasCreditCard')} className="w-5 h-5 text-green-600 rounded" />
-                      <span className="font-bold text-gray-800">סליקה באשראי (PayPlus / משולם וכו')</span>
+                      <span className="font-bold text-gray-800">סליקה באשראי (PayPlus / משולם וכו)</span>
                     </label>
                     {hasCreditCard && (
                       <div className="mt-3 pl-8">
@@ -359,7 +359,7 @@ export default function AuthorRegisterPage() {
             </form>
 
             <div className="mt-6 text-center text-sm text-gray-500">
-              בלחיצה על "צור חשבון סופר" אתה מסכים ל
+              בלחיצה על צור חשבון סופר אתה מסכים ל
               <Link href="#" className="font-medium text-green-600 hover:text-green-500 mx-1">
                 תנאי השימוש
               </Link>

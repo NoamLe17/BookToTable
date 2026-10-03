@@ -121,7 +121,7 @@ function ProfileContent() {
         avatarUrl = await getDownloadURL(storageRef);
       }
 
-      const paymentMethods: any = {};
+      const paymentMethods: NonNullable<User['paymentMethods']> = {};
       if (hasBit && bitPhone) paymentMethods.bit = bitPhone;
       if (hasPaybox && payboxLink) paymentMethods.paybox = payboxLink;
       if (hasCreditCard && creditCardLink) paymentMethods.creditCard = creditCardLink;
@@ -284,7 +284,7 @@ function ProfileContent() {
                   <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
                     <label className="flex items-center gap-3 cursor-pointer mb-2">
                       <input type="checkbox" checked={hasCreditCard} onChange={(e) => setHasCreditCard(e.target.checked)} className="w-5 h-5 text-green-600 rounded" />
-                      <span className="font-bold text-gray-800">סליקה באשראי (PayPlus / משולם וכו')</span>
+                      <span className="font-bold text-gray-800">סליקה באשראי (PayPlus / משולם וכו)</span>
                     </label>
                     {hasCreditCard && (
                       <div className="mt-3 pl-8">
@@ -329,7 +329,7 @@ function ProfileContent() {
                       <Truck size={18} className={shippingDirect ? 'text-green-600' : 'text-gray-400'} />
                       <div>
                         <span className="font-bold text-gray-800 block">משלוח עד הבית</span>
-                        <span className="text-xs text-gray-500">הספר יישלח בדואר / שליח ישירות לכתובת הקורא. עלות: חינם עד 40 ק"מ, תוספת 15₪ מעל.</span>
+                        <span className="text-xs text-gray-500">הספר יישלח בדואר / שליח ישירות לכתובת הקורא. עלות: חינם עד 40 ק״מ, תוספת 15₪ מעל.</span>
                       </div>
                     </label>
                   </div>
@@ -460,8 +460,8 @@ function ProfileContent() {
                 <p>במודל הנוכחי, התשלום מהקורא עובר ישירות אליך ללא עמלות תיווך! כדי לקבל תשלום, עליך להדביק כאן קישור קבוע אליו יופנו הקוראים בסיום ההזמנה.</p>
                 
                 <ul className="list-disc pr-5 space-y-3">
-                  <li><strong>לסופרים פרטיים (ללא עוסק):</strong> מומלץ לפתוח "קופה" חינמית באפליקציית Paybox (יש להגדיר בהגדרות הקופה שהיא 'פרטית'), ולהדביק כאן את הקישור שנוצר לקופה.</li>
-                  <li><strong>לסופרים בעלי עסק רשום:</strong> ניתן להדביק כאן קישור קבוע לדף תשלום באשראי שהפקתם דרך חברת הסליקה שלכם (כמו משולם, PayPlus, אשורית וכו').</li>
+                  <li><strong>לסופרים פרטיים (ללא עוסק):</strong> מומלץ לפתוח &quot;קופה&quot; חינמית באפליקציית Paybox (יש להגדיר בהגדרות הקופה שהיא &apos;פרטית&apos;), ולהדביק כאן את הקישור שנוצר לקופה.</li>
+                  <li><strong>לסופרים בעלי עסק רשום:</strong> ניתן להדביק כאן קישור קבוע לדף תשלום באשראי שהפקתם דרך חברת הסליקה שלכם (כמו משולם, PayPlus, אשורית וכו&apos;).</li>
                 </ul>
 
                 <div className="mt-6 bg-red-50 border border-red-100 text-red-800 p-4 rounded-xl font-medium">

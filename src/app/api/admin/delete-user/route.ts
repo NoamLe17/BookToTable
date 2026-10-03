@@ -33,8 +33,9 @@ export async function POST(request: Request) {
     await adminDb.collection('users').doc(uid).delete();
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in delete-user route:', error);
-    return NextResponse.json({ success: false, error: error.message || 'Failed to delete user' }, { status: 500 });
+    const message = error instanceof Error ? error.message : 'Failed to delete user';
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }

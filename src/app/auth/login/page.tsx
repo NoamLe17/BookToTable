@@ -59,11 +59,12 @@ export default function UnifiedAuthPage() {
       setTimeout(() => {
         router.push('/dashboard');
       }, 1500);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Auth failed:', error);
-      if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+      const authErrorCode = error as { code?: string } | null;
+      if (authErrorCode?.code === 'auth/invalid-credential' || authErrorCode?.code === 'auth/user-not-found' || authErrorCode?.code === 'auth/wrong-password') {
         setAuthError('אימייל או סיסמה שגויים');
-      } else if (error.code === 'auth/email-already-in-use') {
+      } else if (authErrorCode?.code === 'auth/email-already-in-use') {
         setAuthError('האימייל הזה כבר רשום במערכת');
       } else {
         setAuthError('אירעה שגיאה. אנא נסה שנית.');
@@ -257,7 +258,7 @@ export default function UnifiedAuthPage() {
 
             {!isLoginMode && (
               <div className="mt-6 text-center text-sm text-gray-500">
-                בלחיצה על "צור חשבון סופר" אתה מסכים ל
+                בלחיצה על “צור חשבון סופר” אתה מסכים ל
                 <Link href="#" className="font-bold text-green-600 hover:text-green-500 mx-1">
                   תנאי השימוש
                 </Link>
