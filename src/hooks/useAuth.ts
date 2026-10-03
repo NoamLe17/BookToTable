@@ -30,24 +30,28 @@ export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const ensureGoogleUser = useCallback(async (fbUser: FirebaseUser) => {
+    let userData = await getUserById(fbUser.uid);
+    if (!userData) {
+      await createUser(fbUser.uid, {
+        name: fbUser.displayName || 'משתמש גוגל',
+        email: fbUser.email || '',
+        allowsFanMail: false,
+        stripeOnboarded: false,
+        avatarUrl: fbUser.photoURL || undefined,
+      });
+      userData = await getUserById(fbUser.uid);
+    }
+    setUser(userData);
+    return userData;
+  }, []);
+
   useEffect(() => {
-    // Handle redirect result from Google Sign-In on mobile
+    // Handle redirect result from Google Sign-In on mobile or when popup/redirect fallback is used
     getRedirectResult(auth)
       .then(async (result) => {
         if (result?.user) {
-          const fbUser = result.user;
-          let userData = await getUserById(fbUser.uid);
-          if (!userData) {
-            await createUser(fbUser.uid, {
-              name: fbUser.displayName || 'משתמש גוגל',
-              email: fbUser.email || '',
-              allowsFanMail: false,
-              stripeOnboarded: false,
-              avatarUrl: fbUser.photoURL || undefined,
-            });
-            userData = await getUserById(fbUser.uid);
-          }
-          setUser(userData);
+          await ensureGoogleUser(result.user);
         }
       })
       .catch((err) => {
@@ -120,41 +124,56 @@ export function useAuth() {
 
     try {
       if (isMobile()) {
-        // On mobile, use redirect flow (popup is blocked by Safari/iOS)
         await signInWithRedirect(auth, provider);
-        // The page will redirect to Google — result is handled in the useEffect above
-        return;
+        return null;
       }
 
-      // Desktop: use popup
-      const cred = await signInWithPopup(auth, provider);
-      
-      // Check if user exists in our DB, if not, create them
-      let userData = await getUserById(cred.user.uid);
-      if (!userData) {
-        await createUser(cred.user.uid, {
-          name: cred.user.displayName || 'משתמש גוגל',
-          email: cred.user.email || '',
-          allowsFanMail: false,
-          stripeOnboarded: false,
-          avatarUrl: cred.user.photoURL || undefined,
-        });
-        userData = await getUserById(cred.user.uid);
+      try {
+        const cred = await signInWithPopup(auth, provider);
+        await ensureGoogleUser(cred.user);
+        return cred;
+      } catch (popupError: unknown) {
+        const firebaseError = popupError as { code?: string; message?: string };
+
+        if (firebaseError.code === 'auth/popup-blocked' || firebaseError.code === 'auth/cancelled-popup-request') {
+          await signInWithRedirect(auth, provider);
+          return null;
+        }
+
+        if (
+          firebaseError.code === 'auth/redirect-uri-mismatch' ||
+          firebaseError.code === 'auth/unauthorized-domain' ||
+          firebaseError.code === 'auth/invalid-domain' ||
+          firebaseError.message?.includes('redirect_uri')
+        ) {
+          throw new Error('Google Auth לא מוגדר כראוי ב-Firebase. יש להוסיף את הדומיינים/redirect URIs הנכונים: localhost, www.booktotable.com, והדומיין המופעל ב-Vercel.');
+        }
+
+        throw popupError;
       }
-      setUser(userData);
-      return cred;
     } catch (error: unknown) {
-      const firebaseError = error as { code?: string };
+      const firebaseError = error as { code?: string; message?: string };
+
       if (firebaseError.code === 'auth/api-key-not-valid') {
-        alert("שגיאה: חסר מפתח API חוקי של Firebase. אנא עדכן את קובץ .env.local כפי שמוסבר במדריך.");
+        alert('שגיאה: חסר מפתח API חוקי של Firebase. אנא עדכן את קובץ .env.local כפי שמוסבר במדריך.');
       }
-      // Ignore popup-closed-by-user errors silently
+
       if (firebaseError.code === 'auth/popup-closed-by-user' || firebaseError.code === 'auth/cancelled-popup-request') {
-        return;
+        return null;
       }
+
+      if (
+        firebaseError.code === 'auth/redirect-uri-mismatch' ||
+        firebaseError.code === 'auth/unauthorized-domain' ||
+        firebaseError.code === 'auth/invalid-domain' ||
+        firebaseError.message?.includes('redirect_uri')
+      ) {
+        throw new Error('Google Auth לא מוגדר כראוי ב-Firebase. יש להוסיף את הדומיינים/redirect URIs הנכונים: localhost, www.booktotable.com, והדומיין המופעל ב-Vercel.');
+      }
+
       throw error;
     }
-  }, []);
+  }, [ensureGoogleUser]);
 
   const logout = useCallback(async () => {
     await signOut(auth);

@@ -79,17 +79,18 @@ export default function UnifiedAuthPage() {
       setIsSubmitting(true);
       setAuthError('');
       const result = await loginWithGoogle();
-      // On mobile, loginWithGoogle triggers a redirect and returns undefined.
-      // The page will be redirected to Google — no need to setSuccess here.
+      // On redirect-based flows, the browser leaves the page for Google, then comes back.
+      // On popup flow, we complete in-place.
       if (result) {
         setSuccess(true);
         setTimeout(() => {
-          router.push('/dashboard');
+          router.replace('/dashboard');
         }, 1500);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Google login failed:', error);
-      setAuthError('התחברות עם גוגל נכשלה. אנא נסה שנית.');
+      const message = error instanceof Error ? error.message : 'התחברות עם גוגל נכשלה. אנא נסה שנית.';
+      setAuthError(message);
     } finally {
       setIsSubmitting(false);
     }
