@@ -12,7 +12,7 @@ import type { NextRequest } from 'next/server';
  * 2. Firebase Admin SDK token verification in each API route
  * 3. Client-side layout guard in admin/layout.tsx
  */
-export function proxyMiddleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const response = NextResponse.next();
 
