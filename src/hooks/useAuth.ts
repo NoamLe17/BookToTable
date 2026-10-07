@@ -123,10 +123,12 @@ export function useAuth() {
     provider.setCustomParameters({ prompt: 'select_account' });
 
     try {
-      // Redirect-based Google auth is more reliable in browsers with popup restrictions,
-      // strict COOP policies, and Safari/iOS restrictions.
-      await signInWithRedirect(auth, provider);
-      return null;
+      // Use popup instead of redirect to fix cross-domain cookie blocking issues on custom domains
+      const result = await signInWithPopup(auth, provider);
+      if (result?.user) {
+        await ensureGoogleUser(result.user);
+      }
+      return result;
     } catch (error: unknown) {
       const firebaseError = error as { code?: string; message?: string };
 
@@ -145,7 +147,7 @@ export function useAuth() {
 
       throw error;
     }
-  }, []);
+  }, [ensureGoogleUser]);
 
   const logout = useCallback(async () => {
     await signOut(auth);
