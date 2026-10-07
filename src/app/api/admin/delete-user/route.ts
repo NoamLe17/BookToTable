@@ -26,11 +26,30 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: 'Unauthorized. Only super admin can delete users.' }, { status: 403 });
     }
 
+    if (typeof uid !== 'string' || uid.trim() === '') {
+      return NextResponse.json({ success: false, error: 'Invalid UID format' }, { status: 400 });
+    }
+
+    const cleanUid = uid.trim();
+
     // Delete user from Firebase Auth
-    await adminAuth.deleteUser(uid);
+    try {
+      await adminAuth.deleteUser(cleanUid);
+    } catch (authErr: any) {
+      // If user is already deleted from auth, we still want to delete from Firestore
+      if (authErr.code !== 'auth/user-not-found') {
+        console.error('Firebase Auth delete error:', authErr);
+        throw authErr;
+      }
+    }
 
     // Delete user's public profile from Firestore
-    await adminDb.collection('users').doc(uid).delete();
+    try {
+      await adminDb.collection('users').doc(cleanUid).delete();
+    } catch (dbErr: any) {
+      console.error('Firestore delete error for UID:', cleanUid, dbErr);
+      throw dbErr;
+    }
 
     return NextResponse.json({ success: true });
   } catch (error: unknown) {
