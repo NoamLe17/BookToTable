@@ -1,7 +1,17 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Let Next.js bundle firebase-admin natively to fix ESM resolution for jwks-rsa/jose
+  // Prevent Turbopack from bundling firebase-admin and its ESM dependencies
+  // (jwks-rsa uses require() on ESM-only jose, which breaks when bundled)
+  serverExternalPackages: [
+    'firebase-admin',
+    'firebase-admin/app',
+    'firebase-admin/auth',
+    'firebase-admin/firestore',
+    'jwks-rsa',
+    'jose',
+  ],
+
   images: {
     remotePatterns: [
       {

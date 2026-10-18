@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { db, storage } from '@/lib/firebase';
 import {
   collection, onSnapshot, query, doc, deleteDoc, orderBy,
@@ -10,6 +10,7 @@ import { createAdminNotification } from '@/lib/firestore';
 import {
   Users, BookOpen, ShoppingBag, Trash2, Eye,
   TrendingUp, Clock, ChevronDown, ChevronUp, Globe, RefreshCw,
+  AlertTriangle, CheckCircle2, Zap, Database,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import toast from 'react-hot-toast';
@@ -48,6 +49,13 @@ export default function AdminDashboard() {
   const [expandedUser, setExpandedUser] = useState<string | null>(null);
   const [isPinging, setIsPinging] = useState(false);
   const [pingResult, setPingResult] = useState<'success' | 'error' | null>(null);
+  const [isForceIndexing, setIsForceIndexing] = useState(false);
+  const [forceIndexResult, setForceIndexResult] = useState<{ succeeded: number; failed: number } | null>(null);
+
+  // Firebase sync state
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncResult, setSyncResult] = useState<{ orphaned: number; users: { id: string; name?: string; email?: string }[] } | null>(null);
+  const [isCleaning, setIsCleaning] = useState(false);
 
   useEffect(() => {
     let loaded = 0;
@@ -104,13 +112,114 @@ export default function AdminDashboard() {
       void googleRes;
       void bingRes;
       setPingResult('success');
-      toast.success('\u05e1יטמאפ נשלח לגוגל + Bing בהצלחה! גוגל יסרוק את הסיטמאפ בקרוב');
+      toast.success('סיטמאפ נשלח לגוגל + Bing בהצלחה! גוגל יסרוק את הסיטמאפ בקרוב');
     } catch (err: unknown) {
       setPingResult('error');
       console.error(err);
       toast.error('שגיאה בשליחת הסיטמאפ');
     } finally {
       setIsPinging(false);
+    }
+  };
+
+  const handleForceIndexAll = async () => {
+    if (!firebaseUser) return;
+    setIsForceIndexing(true);
+    setForceIndexResult(null);
+    try {
+      const idToken = await firebaseUser.getIdToken();
+      const res = await fetch('/api/indexing/batch', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_CRON_SECRET || ''}`,
+        },
+        body: JSON.stringify({ idToken }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setForceIndexResult({ succeeded: data.succeeded, failed: data.failed });
+        toast.success(`✅ ${data.succeeded} עמודים נשלחו לגוגל לאינדוקס מיידי!`);
+      } else {
+        toast.error('שגיאה: ' + (data.error || 'נסיון כשל'));
+      }
+    } catch (err: unknown) {
+      console.error(err);
+      toast.error('שגיאה בשליחת בקשת האינדוקס');
+    } finally {
+      setIsForceIndexing(false);
+    }
+  };
+
+  // POST to an admin API route and always return parsed JSON (or a readable error)
+  const postAdminApi = async (url: string, body: Record<string, unknown>) => {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const text = await res.text();
+    try {
+      return JSON.parse(text);
+    } catch {
+      return { success: false, error: `HTTP ${res.status}: ${text.slice(0, 200) || res.statusText}` };
+    }
+  };
+
+  const handleSyncCheck = async (silent = false) => {
+    if (!firebaseUser) return;
+    setIsSyncing(true);
+    setSyncResult(null);
+    try {
+      const idToken = await firebaseUser.getIdToken();
+      const data = await postAdminApi('/api/admin/sync-users', { idToken, action: 'check' });
+      if (data.success) {
+        setSyncResult({ orphaned: data.orphaned, users: data.users });
+        if (data.orphaned === 0) {
+          if (!silent) toast.success('✅ כל הנתונים מסונכרנים! אין משתמשים יתומים.');
+        } else {
+          toast('⚠️ נמצאו ' + data.orphaned + ' משתמשים יתומים ב-Firestore', { icon: '⚠️' });
+        }
+      } else {
+        toast.error('שגיאה בבדיקת סנכרון: ' + data.error);
+      }
+    } catch (err: unknown) {
+      console.error(err);
+      const message = err instanceof Error ? err.message : '';
+      toast.error('שגיאה בבדיקת הסנכרון ' + message);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  // Automatic sync check whenever the admin panel loads
+  const autoSyncDone = useRef(false);
+  useEffect(() => {
+    if (!firebaseUser || autoSyncDone.current) return;
+    autoSyncDone.current = true;
+    handleSyncCheck(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [firebaseUser]);
+
+  const handleSyncCleanup = async () => {
+    if (!firebaseUser) return;
+    if (!syncResult || syncResult.orphaned === 0) return;
+    if (!confirm(`האם למחוק לצמיתות ${syncResult.orphaned} משתמשים יתומים מ-Firestore?`)) return;
+    setIsCleaning(true);
+    try {
+      const idToken = await firebaseUser.getIdToken();
+      const data = await postAdminApi('/api/admin/sync-users', { idToken, action: 'cleanup' });
+      if (data.success) {
+        toast.success(`✅ ${data.cleaned} משתמשים יתומים נמחקו מ-Firestore`);
+        setSyncResult(null);
+      } else {
+        toast.error('שגיאה: ' + data.error);
+      }
+    } catch (err: unknown) {
+      console.error(err);
+      toast.error('שגיאה בניקוי');
+    } finally {
+      setIsCleaning(false);
     }
   };
 
@@ -122,13 +231,7 @@ export default function AdminDashboard() {
       // Pass ID token (not email) for real server-side verification
       const idToken = await firebaseUser.getIdToken();
       
-      const response = await fetch('/api/admin/delete-user', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ uid, idToken })
-      });
-      
-      const res = await response.json();
+      const res = await postAdminApi('/api/admin/delete-user', { uid, idToken });
       
       if (res.success) {
         await createAdminNotification({
@@ -167,24 +270,32 @@ export default function AdminDashboard() {
 
       {/* Google Indexing Panel */}
       <div className="bg-white rounded-2xl shadow-sm border border-blue-100 overflow-hidden">
-        <div className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-4">
-          <div className="flex items-center gap-3">
+        <div className="p-4 sm:p-5 border-b border-blue-50">
+          <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center shrink-0">
               <Globe size={20} className="text-blue-600" />
             </div>
             <div>
-              <h3 className="font-bold text-gray-900 text-sm">Google Search Console</h3>
-              <p className="text-xs text-gray-500">שלח סיטמאפ לגוגל + Bing כדי לעדכן את האינדקס</p>
+              <h3 className="font-bold text-gray-900 text-sm">Google Search Console — אינדוקס</h3>
+              <p className="text-xs text-gray-500">שלח את כל הדפים לגוגל לאינדוקס מיידי דרך Google Indexing API</p>
             </div>
           </div>
-          <div className="flex gap-2 sm:mr-auto">
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={handleForceIndexAll}
+              disabled={isForceIndexing}
+              className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors disabled:opacity-60"
+            >
+              <Zap size={15} className={isForceIndexing ? 'animate-pulse' : ''} />
+              {isForceIndexing ? 'שולח לגוגל...' : '⚡ Force Index הכל'}
+            </button>
             <button
               onClick={handlePingSitemap}
               disabled={isPinging}
               className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors disabled:opacity-60"
             >
               <RefreshCw size={15} className={isPinging ? 'animate-spin' : ''} />
-              {isPinging ? 'שולח...' : 'שלח סיטמאפ לגוגל'}
+              {isPinging ? 'שולח...' : 'Ping סיטמאפ'}
             </button>
             <a
               href="https://search.google.com/search-console"
@@ -196,15 +307,84 @@ export default function AdminDashboard() {
               Search Console
             </a>
           </div>
-          {pingResult === 'success' && (
-            <span className="text-xs font-bold text-green-600 bg-green-50 px-3 py-1 rounded-full">
-              ✅ נשלח בהצלחה!
-            </span>
+          {forceIndexResult && (
+            <div className="mt-3 flex items-center gap-2">
+              <CheckCircle2 size={15} className="text-green-600" />
+              <span className="text-xs font-bold text-green-700">
+                {forceIndexResult.succeeded} עמודים הוגשו לגוגל
+                {forceIndexResult.failed > 0 && ` · ${forceIndexResult.failed} נכשלו`}
+              </span>
+            </div>
           )}
-          {pingResult === 'error' && (
-            <span className="text-xs font-bold text-red-600 bg-red-50 px-3 py-1 rounded-full">
-              ❌ שגיאה
-            </span>
+          {pingResult === 'success' && !forceIndexResult && (
+            <div className="mt-3 flex items-center gap-2">
+              <CheckCircle2 size={15} className="text-green-600" />
+              <span className="text-xs font-bold text-green-700">סיטמאפ נשלח בהצלחה!</span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Firebase Data Sync Panel */}
+      <div className="bg-white rounded-2xl shadow-sm border border-orange-100 overflow-hidden">
+        <div className="p-4 sm:p-5">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center shrink-0">
+              <Database size={20} className="text-orange-600" />
+            </div>
+            <div>
+              <h3 className="font-bold text-gray-900 text-sm">בדיקת סנכרון Firebase</h3>
+              <p className="text-xs text-gray-500">
+                בודק שכל הנתונים ב-Firestore מסונכרנים עם Firebase Auth — מוחק משתמשים "יתומים" (נמחקו מ-Auth אך נשארו ב-Firestore)
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => handleSyncCheck()}
+              disabled={isSyncing || isCleaning}
+              className="flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors disabled:opacity-60"
+            >
+              <RefreshCw size={15} className={isSyncing ? 'animate-spin' : ''} />
+              {isSyncing ? 'בודק...' : 'בדוק סנכרון'}
+            </button>
+            {syncResult && syncResult.orphaned > 0 && (
+              <button
+                onClick={handleSyncCleanup}
+                disabled={isCleaning}
+                className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors disabled:opacity-60"
+              >
+                <Trash2 size={15} />
+                {isCleaning ? 'מנקה...' : `נקה ${syncResult.orphaned} יתומים`}
+              </button>
+            )}
+          </div>
+          {syncResult && (
+            <div className="mt-3">
+              {syncResult.orphaned === 0 ? (
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 size={15} className="text-green-600" />
+                  <span className="text-xs font-bold text-green-700">✅ כל הנתונים מסונכרנים — אין משתמשים יתומים</span>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle size={15} className="text-orange-500" />
+                    <span className="text-xs font-bold text-orange-700">
+                      נמצאו {syncResult.orphaned} משתמשים ב-Firestore שנמחקו מ-Firebase Auth:
+                    </span>
+                  </div>
+                  <div className="bg-orange-50 rounded-lg p-3 space-y-1 max-h-40 overflow-y-auto">
+                    {syncResult.users.map(u => (
+                      <div key={u.id} className="text-xs text-gray-700 font-mono flex gap-2">
+                        <span className="text-gray-400">{u.id.slice(0, 10)}...</span>
+                        <span className="font-bold">{u.name || u.email || 'ללא שם'}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           )}
         </div>
       </div>

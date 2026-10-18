@@ -21,12 +21,36 @@ const STATIC_URLS = [
   'https://www.booktotable.com/faq',
 ];
 
+const ADMIN_EMAIL = 'noamhemo2001@gmail.com';
+
 export async function POST(request: Request) {
-  // Basic security: require a secret key
   const authHeader = request.headers.get('authorization');
   const cronSecret = process.env.CRON_SECRET;
 
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+  // Allow via CRON_SECRET header OR via admin idToken in body
+  let authorized = false;
+
+  // Clone request so we can read body multiple times
+  const clonedRequest = request.clone();
+  let bodyIdToken: string | undefined;
+  try {
+    const body = await clonedRequest.json();
+    bodyIdToken = body?.idToken;
+  } catch { /* no body */ }
+
+  if (cronSecret && authHeader === `Bearer ${cronSecret}`) {
+    authorized = true;
+  } else if (bodyIdToken) {
+    // Verify admin idToken
+    try {
+      const { getAdminAuth } = await import('@/lib/firebase-admin');
+      const adminAuth = getAdminAuth();
+      const decoded = await adminAuth.verifyIdToken(bodyIdToken);
+      if (decoded.email === ADMIN_EMAIL) authorized = true;
+    } catch { /* invalid token */ }
+  }
+
+  if (!authorized) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

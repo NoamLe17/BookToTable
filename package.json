@@ -2,6 +2,9 @@
   "name": "booktotable",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -17,6 +20,7 @@
     "canvas-confetti": "^1.9.4",
     "clsx": "^2.1.1",
     "date-fns": "^4.4.0",
+    "dotenv": "^18.0.6",
     "firebase": "^12.14.0",
     "firebase-admin": "^14.5.0",
     "framer-motion": "^12.40.0",

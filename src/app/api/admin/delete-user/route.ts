@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { getAdminAuth, getAdminDb } from '@/lib/firebase-admin';
 
 const ADMIN_EMAIL = 'noamhemo2001@gmail.com';
 
@@ -11,9 +10,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: 'Missing parameters' }, { status: 400 });
     }
 
+    // Dynamic imports — prevents Turbopack from bundling firebase-admin
+    const { getAdminAuth, getAdminDb } = await import('@/lib/firebase-admin');
     const adminAuth = getAdminAuth();
     const adminDb = getAdminDb();
-    
+
     // Verify the caller's Firebase ID token server-side
     let decodedToken;
     try {
