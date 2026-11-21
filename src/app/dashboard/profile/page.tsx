@@ -116,8 +116,10 @@ function ProfileContent() {
       let avatarUrl = targetUser?.avatarUrl;
 
       if (avatarFile) {
-        const storageRef = ref(storage, `avatars/${targetUid}_${Date.now()}`);
-        await uploadBytes(storageRef, avatarFile);
+        const storageRef = ref(storage, `avatars/${targetUid}/${Date.now()}`);
+        await uploadBytes(storageRef, avatarFile, {
+          cacheControl: 'public, max-age=31536000, immutable',
+        });
         avatarUrl = await getDownloadURL(storageRef);
       }
 

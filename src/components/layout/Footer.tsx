@@ -22,6 +22,33 @@ export default function Footer() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [contactSuccess, setContactSuccess] = useState(false);
   const [contactError, setContactError] = useState('');
+  const [attachment, setAttachment] = useState<File | null>(null);
+
+  const MAX_ATTACHMENT_BYTES = 3 * 1024 * 1024; // keeps request under serverless body limits
+
+  const handleAttachmentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setContactError('');
+    if (file && !file.type.startsWith('image/')) {
+      setContactError('ניתן לצרף קובצי תמונה בלבד.');
+      e.target.value = '';
+      return;
+    }
+    if (file && file.size > MAX_ATTACHMENT_BYTES) {
+      setContactError('התמונה גדולה מדי (עד 3MB).');
+      e.target.value = '';
+      return;
+    }
+    setAttachment(file);
+  };
+
+  const readAsBase64 = (file: File) =>
+    new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result).split(',')[1] || '');
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(file);
+    });
 
   const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,16 +56,26 @@ export default function Footer() {
     setContactError('');
 
     try {
+      const payload: Record<string, unknown> = { ...contactForm };
+      if (attachment) {
+        payload.attachment = {
+          filename: attachment.name,
+          contentType: attachment.type,
+          content: await readAsBase64(attachment),
+        };
+      }
+
       const res = await fetch('/api/email/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(contactForm),
+        body: JSON.stringify(payload),
       });
 
       if (!res.ok) throw new Error('שגיאה בשליחת הפנייה');
 
       setContactSuccess(true);
       setContactForm({ name: '', email: '', message: '' });
+      setAttachment(null);
     } catch (err) {
       setContactError('אירעה שגיאה. אנא נסה שוב מאוחר יותר.');
     } finally {
@@ -235,6 +272,17 @@ export default function Footer() {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">תוכן הפנייה</label>
                     <textarea required rows={4} value={contactForm.message} onChange={e => setContactForm({...contactForm, message: e.target.value})} className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-green-500 outline-none resize-none text-right" dir="rtl" />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">צילום מסך (לא חובה)</label>
+                    <input
+                      type="file"
+                      accept="image/png, image/jpeg, image/jpg, image/webp"
+                      onChange={handleAttachmentChange}
+                      className="block w-full text-sm text-gray-600 file:ml-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-gray-100 file:text-gray-700 file:font-medium hover:file:bg-green-50 hover:file:text-green-700"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">PNG, JPG או WEBP עד 3MB</p>
                   </div>
                   
                   <button type="submit" disabled={isSubmitting} className="w-full bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-bold py-3 rounded-xl transition-all mt-4">

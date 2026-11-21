@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { useAuth } from '@/hooks/useAuth';
 import { createBook } from '@/lib/firestore';
 import { uploadFile } from '@/lib/storage';
+import { auth } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
 import { UploadCloud, CheckCircle2, Loader2, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
@@ -22,7 +23,8 @@ type BookFormData = z.infer<typeof bookSchema>;
 
 const buildCoverPath = (userId: string, fileName: string) => {
   const stamp = Date.now();
-  return `covers/${userId}_${stamp}_${fileName}`;
+  // Must match storage.rules: books/{userId}/{fileName}
+  return `books/${userId}/${stamp}_${fileName}`;
 };
 
 export default function AddBookPage() {
@@ -80,11 +82,15 @@ export default function AddBookPage() {
 
       // 3. 🚀 Auto-notify Google to index the new book page immediately
       const bookUrl = `https://www.booktotable.com/books/${bookId}`;
-      fetch('/api/indexing/notify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: bookUrl, type: 'URL_UPDATED' }),
-      }).catch(err => console.warn('[Indexing] Notification failed (non-critical):', err));
+      (async () => {
+        const idToken = await auth.currentUser?.getIdToken();
+        if (!idToken) return;
+        await fetch('/api/indexing/notify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
+          body: JSON.stringify({ url: bookUrl, type: 'URL_UPDATED' }),
+        });
+      })().catch(err => console.warn('[Indexing] Notification failed (non-critical):', err));
 
       setSuccess(true);
       setTimeout(() => {
