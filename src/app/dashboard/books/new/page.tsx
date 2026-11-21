@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { useAuth } from '@/hooks/useAuth';
 import { createBook } from '@/lib/firestore';
 import { uploadFile } from '@/lib/storage';
+import { resizeImage } from '@/lib/image';
 import { auth } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
 import { UploadCloud, CheckCircle2, Loader2, ArrowRight } from 'lucide-react';
@@ -62,9 +63,14 @@ export default function AddBookPage() {
 
     setIsSubmitting(true);
     try {
-      // 1. Upload Cover Image to Firebase Storage
-      const filePath = buildCoverPath(user.id, coverFile.name);
-      const coverUrl = await uploadFile(coverFile, filePath, (progress) => {
+      // 1. Shrink the image (phone photos can be 5MB+), then upload to Firebase Storage
+      const fileToUpload = await resizeImage(coverFile, { maxDimension: 1600, quality: 0.85 });
+      if (fileToUpload.size >= 5 * 1024 * 1024) {
+        alert("תמונת הכריכה גדולה מדי (מעל 5MB). אנא בחר תמונה קטנה יותר.");
+        return;
+      }
+      const filePath = buildCoverPath(user.id, fileToUpload.name);
+      const coverUrl = await uploadFile(fileToUpload, filePath, (progress) => {
         setUploadProgress(progress);
       });
 
@@ -151,7 +157,7 @@ export default function AddBookPage() {
                       {previewUrl ? 'לחץ להחלפת תמונה' : 'לחץ כאן להעלאת תמונה'}
                     </span>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">PNG, JPG עד 5MB</p>
+                  <p className="text-xs text-gray-500 mt-1">PNG או JPG — תמונות גדולות יוקטנו אוטומטית</p>
                 </div>
               </div>
               <input

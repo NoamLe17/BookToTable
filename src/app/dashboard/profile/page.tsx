@@ -9,6 +9,7 @@ import { db, storage } from '@/lib/firebase';
 import { User } from '@/types';
 import { useSearchParams } from 'next/navigation';
 import { getUserById } from '@/lib/firestore';
+import { resizeImage } from '@/lib/image';
 
 function ProfileContent() {
   const { firebaseUser, user } = useAuth();
@@ -116,8 +117,10 @@ function ProfileContent() {
       let avatarUrl = targetUser?.avatarUrl;
 
       if (avatarFile) {
+        const smallAvatar = await resizeImage(avatarFile, { maxDimension: 512, quality: 0.85 });
         const storageRef = ref(storage, `avatars/${targetUid}/${Date.now()}`);
-        await uploadBytes(storageRef, avatarFile, {
+        await uploadBytes(storageRef, smallAvatar, {
+          contentType: smallAvatar.type,
           cacheControl: 'public, max-age=31536000, immutable',
         });
         avatarUrl = await getDownloadURL(storageRef);
